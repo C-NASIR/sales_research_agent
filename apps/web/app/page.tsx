@@ -1,18 +1,25 @@
+import Link from "next/link";
+
 const mvpSteps = [
   "Create campaign",
   "Upload companies",
-  "Run research",
-  "Review accounts",
-  "Export prospects",
+  "Start research",
+  "Review results later",
+  "Export prospects later",
 ];
 
 export default function HomePage() {
   return (
     <main className="page-shell">
       <section className="hero-card">
-        <p className="eyebrow">Phase 0 foundation is running</p>
+        <p className="eyebrow">Phase 6 browser workflow</p>
         <h1>Prospecting Agent</h1>
         <p className="lead">AI sales research workspace powered by Deep Agents</p>
+        <div className="hero-actions">
+          <Link className="button button-primary" href="/campaigns">
+            Open campaigns
+          </Link>
+        </div>
       </section>
 
       <section className="flow-card">

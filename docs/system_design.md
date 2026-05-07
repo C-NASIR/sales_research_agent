@@ -58,3 +58,12 @@ The frontend provides a basic landing page that confirms the project shell is ru
 
 - A future Deep Agents coordinator will manage multi-step research and enrichment workflows.
 - Later phases will add research orchestration, scoring, review, and export workflows on top of the Phase 2 input foundation.
+
+## Phase 6 frontend campaign setup
+
+- The Next.js app now exposes the first usable browser workflow: campaign list, campaign creation, campaign detail, CSV upload, account preview, and run start
+- Route pages stay server-rendered so campaign lists and detail views fetch directly from the FastAPI API on navigation
+- React Query is used for client-side mutations only: create campaign, upload CSV, and start run
+- The shared frontend API client reads `NEXT_PUBLIC_API_BASE_URL`, defaults to `http://localhost:8000`, and preserves backend `detail` messages when requests fail
+- CSV parsing and validation remain backend-owned; the browser only submits `FormData` with a `file` field and renders the returned upload report
+- After upload or run start, the client calls `router.refresh()` so the server-rendered campaign status and account list stay aligned with backend state

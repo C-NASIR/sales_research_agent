@@ -2,7 +2,7 @@
   color-scheme: light;
   font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
   background:
-    radial-gradient(circle at top, rgba(37, 99, 235, 0.14), transparent 32%),
+    radial-gradient(circle at top, rgba(37, 99, 235, 0.16), transparent 30%),
     linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
   color: #0f172a;
 }
@@ -21,15 +21,38 @@ body {
   min-height: 100vh;
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+p,
+li,
+dd {
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3,
+dl,
+ol,
+ul,
+p {
+  margin-top: 0;
+}
+
 .page-shell {
-  width: min(960px, calc(100% - 2rem));
+  width: min(1100px, calc(100% - 2rem));
   margin: 0 auto;
-  padding: 4rem 0 5rem;
+  padding: 3rem 0 5rem;
 }
 
 .hero-card,
-.flow-card {
-  background: rgba(255, 255, 255, 0.82);
+.flow-card,
+.card,
+.state-block {
+  background: rgba(255, 255, 255, 0.84);
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 24px;
   box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
@@ -40,9 +63,10 @@ body {
   padding: 2.5rem;
 }
 
-.hero-card h1 {
-  margin: 0;
-  font-size: clamp(2.5rem, 6vw, 4.75rem);
+.hero-card h1,
+.section-heading h1 {
+  margin-bottom: 0.75rem;
+  font-size: clamp(2.5rem, 6vw, 4.4rem);
   line-height: 0.95;
   letter-spacing: -0.06em;
 }
@@ -57,48 +81,332 @@ body {
 }
 
 .lead {
-  max-width: 34rem;
-  margin: 1rem 0 0;
-  font-size: 1.15rem;
-  line-height: 1.6;
+  max-width: 42rem;
+  margin: 0;
+  font-size: 1.1rem;
   color: #334155;
+}
+
+.hero-actions,
+.form-actions,
+.section-heading,
+.card-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.hero-actions,
+.form-actions {
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.section-heading,
+.card-row {
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.flow-card,
+.card,
+.state-block {
+  padding: 2rem;
 }
 
 .flow-card {
   margin-top: 1.5rem;
-  padding: 2rem 2.25rem;
-}
-
-.flow-card h2 {
-  margin: 0 0 1rem;
-  font-size: 1.3rem;
 }
 
 .flow-card ol {
-  margin: 0;
+  margin-bottom: 0;
   padding-left: 1.25rem;
   display: grid;
   gap: 0.85rem;
   color: #1e293b;
 }
 
-.flow-card li {
-  line-height: 1.5;
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.75rem;
+  padding: 0.75rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease,
+    border-color 0.15s ease;
 }
 
-@media (max-width: 640px) {
+.button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button-primary {
+  background: #0f172a;
+  color: #f8fafc;
+}
+
+.button-secondary {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #0f172a;
+}
+
+.button-ghost {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.4);
+  color: #0f172a;
+}
+
+.inline-button {
+  width: fit-content;
+}
+
+.campaign-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.campaign-card h2,
+.card h2,
+.state-block h2 {
+  margin-bottom: 0.75rem;
+  font-size: 1.4rem;
+}
+
+.campaign-meta,
+.supporting-text,
+.field-description,
+.detail-grid dt {
+  color: #475569;
+}
+
+.status-badge,
+.count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.count-pill {
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+
+.status-draft {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.status-ready {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-running {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.status-completed {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.status-failed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-partial {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.stack-xl,
+.stack-lg,
+.stack-md,
+.stack-sm {
+  display: grid;
+}
+
+.stack-xl {
+  gap: 2rem;
+}
+
+.stack-lg {
+  gap: 1.5rem;
+}
+
+.stack-md {
+  gap: 1rem;
+}
+
+.stack-sm {
+  gap: 0.75rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field-label {
+  font-weight: 700;
+}
+
+.field-description,
+.supporting-text {
+  margin-bottom: 0;
+  font-size: 0.95rem;
+}
+
+.field-error,
+.error-message {
+  margin-bottom: 0;
+  color: #b91c1c;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #0f172a;
+  font: inherit;
+  padding: 0.9rem 1rem;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 7rem;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.25);
+  border-color: #3b82f6;
+}
+
+.detail-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  margin-bottom: 0;
+}
+
+.detail-grid dt {
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.detail-grid dd {
+  margin-left: 0;
+}
+
+.summary-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.summary-grid strong,
+.summary-label {
+  display: block;
+}
+
+.summary-label {
+  margin-bottom: 0.35rem;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.detail-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #475569;
+}
+
+.state-block {
+  text-align: left;
+}
+
+.state-loading {
+  border-style: dashed;
+}
+
+.success-message {
+  margin: 0;
+  color: #166534;
+}
+
+@media (max-width: 720px) {
   .page-shell {
     padding-top: 2rem;
   }
 
   .hero-card,
-  .flow-card {
+  .flow-card,
+  .card,
+  .state-block {
     border-radius: 18px;
+    padding: 1.35rem;
   }
 
-  .hero-card,
-  .flow-card {
-    padding-left: 1.25rem;
-    padding-right: 1.25rem;
+  .section-heading,
+  .card-row {
+    flex-direction: column;
+  }
+
+  .button {
+    width: 100%;
+  }
+
+  .inline-button {
+    width: fit-content;
   }
 }

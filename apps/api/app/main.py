@@ -4,7 +4,6 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from app.api.accounts import router as accounts_router
 from app.api.campaigns import router as campaigns_router
 from app.api.events import router as events_router

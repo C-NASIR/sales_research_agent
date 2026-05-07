@@ -21,7 +21,7 @@ The project currently includes the first five backend phases:
 - Root documentation, environment examples, and sample CSV data
 - Local project folders for future campaign workspaces
 
-The project does not include frontend campaign screens, review approvals, export workflow, CRM integrations, or production deployment yet.
+The project now includes the first frontend campaign setup screens, but it still does not include progress UI, results pages, review approvals, export workflow, CRM integrations, or production deployment.
 
 ## Local setup
 
@@ -52,7 +52,24 @@ npm install
 npm run dev
 ```
 
+If you need a custom backend URL:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev
+```
+
 ## Expected URLs
 
 - Backend health: [http://localhost:8000/health](http://localhost:8000/health)
 - Frontend: [http://localhost:3000](http://localhost:3000)
+
+## Browser workflow
+
+1. Open [http://localhost:3000](http://localhost:3000)
+2. Click through to `/campaigns`
+3. Create a campaign from `/campaigns/new`
+4. Upload `samples/devtools_companies.csv` on the campaign detail page
+5. Confirm the uploaded accounts appear in the table
+6. Start the research run from the same page
+
+This Phase 6 browser flow stops after run creation. Progress, results, review, and export arrive in later phases.

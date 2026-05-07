@@ -1,6 +1,23 @@
 # Prospecting Agent Web
 
-This Next.js app provides the Phase 0 frontend foundation for Prospecting Agent.
+This Next.js app now provides the Phase 6 campaign setup workflow for Prospecting Agent.
+
+## Dependencies added in Phase 6
+
+- `@tanstack/react-query`
+- `react-hook-form`
+- `zod`
+- `@hookform/resolvers`
+
+## Environment
+
+The frontend reads the backend base URL from `NEXT_PUBLIC_API_BASE_URL`.
+
+If you do not set it, the app defaults to:
+
+```text
+http://localhost:8000
+```
 
 ## Setup
 
@@ -15,3 +32,19 @@ npm run dev
 ```
 
 The app starts on `http://localhost:3000` by default.
+
+## Phase 6 browser flow
+
+1. Open `http://localhost:3000`
+2. Go to `/campaigns`
+3. Create a campaign at `/campaigns/new`
+4. Upload `samples/devtools_companies.csv`
+5. Review the uploaded accounts table
+6. Start a research run
+
+## Known limitations
+
+- There is no progress page yet.
+- There is no results dashboard yet.
+- There are no account detail pages yet.
+- Review and export workflows are not in the frontend yet.
