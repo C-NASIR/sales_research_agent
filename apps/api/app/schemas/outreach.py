@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class OutreachDraftResponse(BaseModel):
@@ -31,6 +31,34 @@ class OutreachDraftUpdate(BaseModel):
     personalization_source: str | None = None
     personalization_source_url: str | None = None
     sales_angle: str | None = None
+
+    @model_validator(mode="after")
+    def validate_update(self) -> "OutreachDraftUpdate":
+        if not self.model_fields_set:
+            raise ValueError("At least one draft field must be provided.")
+
+        if "subject" in self.model_fields_set:
+            subject = (self.subject or "").strip()
+            if not subject:
+                raise ValueError("Subject cannot be empty.")
+            self.subject = subject
+
+        if "body" in self.model_fields_set:
+            body = (self.body or "").strip()
+            if not body:
+                raise ValueError("Body cannot be empty.")
+            self.body = body
+
+        if "personalization_source" in self.model_fields_set and self.personalization_source is not None:
+            self.personalization_source = self.personalization_source.strip()
+
+        if "personalization_source_url" in self.model_fields_set and self.personalization_source_url is not None:
+            self.personalization_source_url = self.personalization_source_url.strip()
+
+        if "sales_angle" in self.model_fields_set and self.sales_angle is not None:
+            self.sales_angle = self.sales_angle.strip()
+
+        return self
 
 
 class QualityReviewResponse(BaseModel):

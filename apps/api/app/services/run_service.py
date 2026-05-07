@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 from fastapi import BackgroundTasks
@@ -12,6 +13,8 @@ from app.services import campaign_service, event_service
 from app.services.research_service import ResearchConfigurationError
 from app.utils.ids import new_id
 from app.utils.timestamps import utc_now
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -86,7 +89,7 @@ def start_campaign_run_background(
     if not campaign.accounts:
         raise RunServiceError(status_code=400, detail="Campaign has no accounts to process")
     if get_active_campaign_run(db, campaign_id) is not None:
-        raise RunServiceError(status_code=400, detail="A campaign run is already in progress.")
+        raise RunServiceError(status_code=409, detail="A campaign run is already in progress.")
 
     run = create_campaign_run(db, campaign_id)
     campaign_service.update_campaign_status(db, campaign_id, "running")
@@ -109,6 +112,12 @@ def execute_campaign_run(run_id: str, campaign_id: str) -> None:
     except ResearchConfigurationError as exc:
         _mark_run_failed(db, campaign_id, run_id, str(exc), configuration_error=True)
     except Exception as exc:
+        logger.exception(
+            "Campaign run failed unexpectedly for campaign_id=%s run_id=%s",
+            campaign_id,
+            run_id,
+            exc_info=exc,
+        )
         _mark_run_failed(db, campaign_id, run_id, str(exc), configuration_error=False)
     finally:
         db.close()

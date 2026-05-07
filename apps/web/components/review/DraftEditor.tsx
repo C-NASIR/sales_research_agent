@@ -47,9 +47,12 @@ export function DraftEditor({
   const queryClient = useQueryClient();
   const [form, setForm] = useState<DraftFormState>(() => toFormState(draft));
   const [savedMessage, setSavedMessage] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
     setForm(toFormState(draft));
+    setSavedMessage(null);
+    setLocalError(null);
   }, [draft]);
 
   const mutation = useMutation({
@@ -78,6 +81,15 @@ export function DraftEditor({
 
   async function handleSave() {
     setSavedMessage(null);
+    setLocalError(null);
+    if (!form.subject.trim()) {
+      setLocalError("Subject cannot be empty.");
+      return;
+    }
+    if (!form.body.trim()) {
+      setLocalError("Body cannot be empty.");
+      return;
+    }
     const input: OutreachDraftUpdate = {
       subject: form.subject,
       body: form.body,
@@ -87,6 +99,13 @@ export function DraftEditor({
     };
     await mutation.mutateAsync(input);
   }
+
+  const hasChanges =
+    form.subject !== (draft.subject ?? "") ||
+    form.body !== (draft.body ?? "") ||
+    form.personalization_source !== (draft.personalization_source ?? "") ||
+    form.personalization_source_url !== (draft.personalization_source_url ?? "") ||
+    form.sales_angle !== (draft.sales_angle ?? "");
 
   return (
     <Card className="stack-md">
@@ -105,9 +124,11 @@ export function DraftEditor({
           <Input
             id="draft-subject"
             value={form.subject}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, subject: event.target.value }))
-            }
+            onChange={(event) => {
+              setSavedMessage(null);
+              setLocalError(null);
+              setForm((current) => ({ ...current, subject: event.target.value }));
+            }}
           />
         </Field>
 
@@ -115,9 +136,11 @@ export function DraftEditor({
           <Textarea
             id="draft-body"
             value={form.body}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, body: event.target.value }))
-            }
+            onChange={(event) => {
+              setSavedMessage(null);
+              setLocalError(null);
+              setForm((current) => ({ ...current, body: event.target.value }));
+            }}
           />
         </Field>
 
@@ -125,12 +148,14 @@ export function DraftEditor({
           <Input
             id="draft-personalization-source"
             value={form.personalization_source}
-            onChange={(event) =>
+            onChange={(event) => {
+              setSavedMessage(null);
+              setLocalError(null);
               setForm((current) => ({
                 ...current,
                 personalization_source: event.target.value,
-              }))
-            }
+              }));
+            }}
           />
         </Field>
 
@@ -141,12 +166,14 @@ export function DraftEditor({
           <Input
             id="draft-personalization-source-url"
             value={form.personalization_source_url}
-            onChange={(event) =>
+            onChange={(event) => {
+              setSavedMessage(null);
+              setLocalError(null);
               setForm((current) => ({
                 ...current,
                 personalization_source_url: event.target.value,
-              }))
-            }
+              }));
+            }}
           />
         </Field>
 
@@ -154,12 +181,16 @@ export function DraftEditor({
           <Input
             id="draft-sales-angle"
             value={form.sales_angle}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, sales_angle: event.target.value }))
-            }
+            onChange={(event) => {
+              setSavedMessage(null);
+              setLocalError(null);
+              setForm((current) => ({ ...current, sales_angle: event.target.value }));
+            }}
           />
         </Field>
       </div>
+
+      {localError ? <ErrorMessage message={localError} /> : null}
 
       {mutation.isError ? (
         <ErrorMessage
@@ -171,7 +202,7 @@ export function DraftEditor({
         />
       ) : null}
 
-      <Button disabled={mutation.isPending} onClick={handleSave}>
+      <Button disabled={!hasChanges || mutation.isPending} onClick={handleSave}>
         {mutation.isPending ? "Saving draft..." : "Save draft changes"}
       </Button>
     </Card>

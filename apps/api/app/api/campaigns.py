@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_campaign_or_404
 from app.db.session import get_db
 from app.schemas.campaign import CampaignCreate, CampaignListResponse, CampaignResponse
 from app.services import campaign_service, event_service
@@ -35,7 +36,5 @@ def list_campaigns(db: Session = Depends(get_db)) -> CampaignListResponse:
 
 @router.get("/campaigns/{campaign_id}", response_model=CampaignResponse)
 def get_campaign(campaign_id: str, db: Session = Depends(get_db)) -> CampaignResponse:
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+    campaign = get_campaign_or_404(db, campaign_id)
     return CampaignResponse.model_validate(campaign)

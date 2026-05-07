@@ -14,6 +14,8 @@ import { ResultsFilters, type ResultsFilterState } from "./ResultsFilters";
 import { ResultsSummaryCards } from "./ResultsSummaryCards";
 import { ExportList } from "../review/ExportList";
 import { ExportPanel } from "../review/ExportPanel";
+import { ErrorMessage } from "../ui/ErrorMessage";
+import { LoadingState } from "../ui/LoadingState";
 
 type ResultsWorkspaceProps = {
   campaignId: string;
@@ -47,6 +49,19 @@ export function ResultsWorkspace({
     queryFn: async () => (await listCampaignExports(campaignId)).exports,
     initialData: initialExports,
   });
+
+  if (resultsQuery.isPending && !resultsQuery.data) {
+    return (
+      <LoadingState
+        title="Loading results"
+        message="Fetching campaign results and export files."
+      />
+    );
+  }
+
+  if (!resultsQuery.data) {
+    return <ErrorMessage message="Unable to load results for this campaign." />;
+  }
 
   const accounts = resultsQuery.data.accounts;
 
@@ -97,6 +112,24 @@ export function ResultsWorkspace({
 
   return (
     <div className="stack-xl">
+      {resultsQuery.isError ? (
+        <ErrorMessage
+          message={
+            resultsQuery.error instanceof Error
+              ? resultsQuery.error.message
+              : "Unable to refresh results."
+          }
+        />
+      ) : null}
+      {exportsQuery.isError ? (
+        <ErrorMessage
+          message={
+            exportsQuery.error instanceof Error
+              ? exportsQuery.error.message
+              : "Unable to refresh exports."
+          }
+        />
+      ) : null}
       <ResultsSummaryCards accounts={accounts} />
       <ResultsFilters
         filters={filters}
@@ -109,7 +142,7 @@ export function ResultsWorkspace({
         campaignId={campaignId}
         approvedAccountCount={approvedAccountCount}
       />
-      <ExportList exports={exportsQuery.data} />
+      <ExportList exports={exportsQuery.data ?? []} />
       <section className="card stack-md">
         <div className="card-row">
           <div>

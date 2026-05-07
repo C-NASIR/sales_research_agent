@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_campaign_or_404
+from app.api.errors import bad_request
 from app.db.session import get_db
 from app.schemas.upload import (
     UploadAccountPreview,
@@ -20,16 +22,16 @@ async def upload_campaign_accounts(
     file: UploadFile | None = File(default=None),
     db: Session = Depends(get_db),
 ) -> UploadReportResponse:
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+    campaign = get_campaign_or_404(db, campaign_id)
 
     if file is None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="File is required")
+        raise bad_request("File is required")
+    if not _is_csv_upload(file):
+        raise bad_request("Uploaded file must be a CSV file")
 
     file_bytes = await file.read()
     if not file_bytes:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Uploaded file is empty")
+        raise bad_request("Uploaded file is empty")
 
     event_service.record_event(
         db,
@@ -49,7 +51,7 @@ async def upload_campaign_accounts(
             message="CSV upload failed",
             payload={"error": str(exc)},
         )
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+        raise bad_request(str(exc)) from exc
 
     existing_domains = account_service.get_existing_domains_for_campaign(db, campaign_id)
     accounts_to_create: list[dict[str, str]] = []
@@ -141,3 +143,11 @@ async def upload_campaign_accounts(
         },
     )
     return report
+
+
+def _is_csv_upload(file: UploadFile) -> bool:
+    filename = (file.filename or "").strip().lower()
+    content_type = (file.content_type or "").strip().lower()
+    if filename.endswith(".csv"):
+        return True
+    return content_type in {"text/csv", "application/csv", "application/vnd.ms-excel"}

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 REVIEW_STATUSES = (
     "unreviewed",
@@ -15,6 +15,14 @@ REVIEW_STATUSES = (
 
 class ReviewStatusUpdate(BaseModel):
     review_status: str
+
+    @field_validator("review_status")
+    @classmethod
+    def validate_review_status(cls, value: str) -> str:
+        normalized = value.strip()
+        if normalized not in REVIEW_STATUSES:
+            raise ValueError("Invalid review status.")
+        return normalized
 
 
 class ReviewStatusResponse(BaseModel):

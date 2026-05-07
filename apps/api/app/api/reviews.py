@@ -3,10 +3,11 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_account_or_404, get_campaign_or_404
 from app.db.session import get_db
 from app.schemas.outreach import OutreachDraftResponse, OutreachDraftUpdate
 from app.schemas.review import ReviewStatusResponse, ReviewStatusUpdate
-from app.services import account_service, campaign_service, review_service
+from app.services import review_service
 
 router = APIRouter(tags=["reviews"])
 
@@ -21,9 +22,7 @@ def update_account_review_status(
     input: ReviewStatusUpdate,
     db: Session = Depends(get_db),
 ) -> ReviewStatusResponse:
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+    get_campaign_or_404(db, campaign_id)
 
     try:
         result = review_service.update_account_review_status(
@@ -36,7 +35,7 @@ def update_account_review_status(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
 
     if result is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found.")
     return ReviewStatusResponse.model_validate(result)
 
 
@@ -50,12 +49,8 @@ def update_outreach_draft(
     input: OutreachDraftUpdate,
     db: Session = Depends(get_db),
 ) -> OutreachDraftResponse:
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
-    account = account_service.get_account(db, campaign_id, account_id)
-    if account is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+    get_campaign_or_404(db, campaign_id)
+    get_account_or_404(db, campaign_id, account_id)
 
     try:
         draft = review_service.update_outreach_draft(db, campaign_id, account_id, input)
@@ -63,5 +58,5 @@ def update_outreach_draft(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
 
     if draft is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Outreach draft not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Outreach draft not found.")
     return OutreachDraftResponse.model_validate(draft)

@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.accounts import router as accounts_router
 from app.api.campaigns import router as campaigns_router
+from app.api.errors import unhandled_exception_handler, validation_exception_handler
 from app.api.events import router as events_router
 from app.api.exports import router as exports_router
 from app.api.health import router as health_router
@@ -18,12 +21,20 @@ from app.config import settings
 from app.db.init_db import init_db
 
 
+def _configure_logging() -> None:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     init_db()
     yield
 
 
+_configure_logging()
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
@@ -32,6 +43,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(Exception, unhandled_exception_handler)
 app.include_router(health_router)
 app.include_router(campaigns_router)
 app.include_router(accounts_router)

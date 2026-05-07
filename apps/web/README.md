@@ -1,6 +1,6 @@
 # Prospecting Agent Web
 
-This Next.js app now provides the Phase 9 campaign setup, run visibility, results dashboard, account review, draft editing, and export workflow for Prospecting Agent.
+This Next.js app now provides the Phase 10 campaign setup, run visibility, results dashboard, account review, draft editing, and export workflow for Prospecting Agent.
 
 ## Dependencies added in Phase 6
 
@@ -34,6 +34,16 @@ npm run dev
 
 The app starts on `http://localhost:3000` by default.
 
+## Validation commands
+
+```bash
+npm run typecheck
+npm run lint
+npm run test
+```
+
+Phase 10 adds a small Vitest setup for shared badge and score display components alongside the existing Next.js type checks.
+
 ## Phase 6 browser flow
 
 1. Open `http://localhost:3000`
@@ -48,6 +58,7 @@ The app starts on `http://localhost:3000` by default.
 - The app still does not send emails.
 - The app still does not write to a CRM.
 - Bulk review workflows are not in the frontend yet.
+- There are no end-to-end browser tests in this phase.
 
 ## Phase 7 browser validation
 
@@ -82,3 +93,12 @@ The app starts on `http://localhost:3000` by default.
 9. Filter by review status and confirm the updated account appears
 10. Create exports with the default approved-only selection
 11. Download the generated CSV, Markdown report, and JSON archive
+
+## Phase 10 browser validation
+
+1. Run `python3 scripts/seed_demo.py --run-fake-workflow` from `apps/api` with `RESEARCH_MODE=fake`
+2. Open the printed campaign URL in the browser
+3. Confirm the campaign detail page handles empty and disabled states cleanly
+4. Open the results page and confirm refresh errors do not crash the workspace
+5. Open one account and confirm draft validation prevents empty subject/body saves
+6. Create exports and confirm success feedback appears

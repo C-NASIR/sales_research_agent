@@ -32,11 +32,13 @@ export function ExportPanel({
   const [selectedStatuses, setSelectedStatuses] = useState<ReviewStatus[]>([
     "approved",
   ]);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: (statuses: ReviewStatus[]) =>
       createCampaignExports(campaignId, { include_review_statuses: statuses }),
     onSuccess: async () => {
+      setSuccessMessage("Export files created.");
       await queryClient.invalidateQueries({
         queryKey: ["campaign-exports", campaignId],
       });
@@ -74,6 +76,7 @@ export function ExportPanel({
                 <input
                   checked={checked}
                   onChange={(event) => {
+                    setSuccessMessage(null);
                     setSelectedStatuses((current) => {
                       if (event.target.checked) {
                         return [...current, status];
@@ -89,8 +92,10 @@ export function ExportPanel({
           })}
         </div>
 
-      {mutation.isError ? (
-        <ErrorMessage
+        {successMessage ? <p className="success-message">{successMessage}</p> : null}
+
+        {mutation.isError ? (
+          <ErrorMessage
             message={
               mutation.error instanceof ApiError
                 ? mutation.error.message
@@ -99,13 +104,16 @@ export function ExportPanel({
           />
         ) : null}
 
-      <Button
-        disabled={!selectedStatuses.length || mutation.isPending}
-        onClick={() => mutation.mutate(selectedStatuses)}
-      >
-        {mutation.isPending ? "Creating exports..." : "Create export"}
-      </Button>
-    </Card>
+        <Button
+          disabled={!selectedStatuses.length || mutation.isPending}
+          onClick={() => {
+            setSuccessMessage(null);
+            mutation.mutate(selectedStatuses);
+          }}
+        >
+          {mutation.isPending ? "Creating exports..." : "Create export"}
+        </Button>
+      </Card>
     </div>
   );
 }

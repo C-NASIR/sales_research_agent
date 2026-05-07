@@ -11,3 +11,6 @@ firecrawl-py<5.0.0,>=2.16.5
 httpx<1.0.0,>=0.28.0
 beautifulsoup4<5.0.0,>=4.12.0
 tenacity<10.0.0,>=9.0.0
+
+[dev]
+pytest<9.0.0,>=8.0.0

@@ -1,9 +1,10 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_campaign_or_404
 from app.db.session import get_db
 from app.schemas.run import CampaignRunCreateResponse, CampaignRunListResponse, CampaignRunResponse
-from app.services import campaign_service, run_service
+from app.services import run_service
 
 router = APIRouter(tags=["runs"])
 
@@ -23,33 +24,24 @@ def create_run(
 
 @router.get("/campaigns/{campaign_id}/runs", response_model=CampaignRunListResponse)
 def list_runs(campaign_id: str, db: Session = Depends(get_db)) -> CampaignRunListResponse:
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-
+    get_campaign_or_404(db, campaign_id)
     runs = run_service.list_campaign_runs(db, campaign_id)
     return CampaignRunListResponse(runs=[CampaignRunResponse.model_validate(run) for run in runs])
 
 
 @router.get("/campaigns/{campaign_id}/runs/latest", response_model=CampaignRunResponse)
 def get_latest_run(campaign_id: str, db: Session = Depends(get_db)) -> CampaignRunResponse:
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-
+    get_campaign_or_404(db, campaign_id)
     run = run_service.get_latest_campaign_run(db, campaign_id)
     if run is None:
-        raise HTTPException(status_code=404, detail="Run not found")
+        raise HTTPException(status_code=404, detail="Run not found.")
     return CampaignRunResponse.model_validate(run)
 
 
 @router.get("/campaigns/{campaign_id}/runs/{run_id}", response_model=CampaignRunResponse)
 def get_run(campaign_id: str, run_id: str, db: Session = Depends(get_db)) -> CampaignRunResponse:
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=404, detail="Campaign not found")
-
+    get_campaign_or_404(db, campaign_id)
     run = run_service.get_campaign_run(db, campaign_id, run_id)
     if run is None:
-        raise HTTPException(status_code=404, detail="Run not found")
+        raise HTTPException(status_code=404, detail="Run not found.")
     return CampaignRunResponse.model_validate(run)

@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
     <main className="page-shell">
       <section className="hero-card">
-        <p className="eyebrow">Phase 6 browser workflow</p>
+        <p className="eyebrow">Phase 10 demo workspace</p>
         <h1>Prospecting Agent</h1>
         <p className="lead">AI sales research workspace powered by Deep Agents</p>
         <div className="hero-actions">

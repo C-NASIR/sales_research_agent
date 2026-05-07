@@ -6,6 +6,8 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_campaign_or_404
+from app.api.errors import not_found
 from app.db.session import get_db
 from app.schemas.export import (
     ExportCreateRequest,
@@ -13,7 +15,8 @@ from app.schemas.export import (
     ExportFileResponse,
     ExportListResponse,
 )
-from app.services import campaign_service, export_service
+from app.services import export_service
+from app.workspace import paths
 
 router = APIRouter(tags=["exports"])
 
@@ -24,9 +27,7 @@ def create_exports(
     input: ExportCreateRequest | None = Body(default=None),
     db: Session = Depends(get_db),
 ) -> ExportCreateResponse:
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+    get_campaign_or_404(db, campaign_id)
 
     try:
         exports = export_service.create_campaign_exports(
@@ -45,9 +46,7 @@ def create_exports(
 
 @router.get("/campaigns/{campaign_id}/exports", response_model=ExportListResponse)
 def list_exports(campaign_id: str, db: Session = Depends(get_db)) -> ExportListResponse:
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+    get_campaign_or_404(db, campaign_id)
 
     exports = export_service.list_campaign_exports(db, campaign_id)
     return ExportListResponse(
@@ -62,18 +61,13 @@ def download_export(
     export_id: str,
     db: Session = Depends(get_db),
 ):
-    campaign = campaign_service.get_campaign(db, campaign_id)
-    if campaign is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Campaign not found")
+    get_campaign_or_404(db, campaign_id)
 
     export_file = export_service.get_campaign_export(db, campaign_id, export_id)
     if export_file is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Export not found")
+        raise not_found("Export not found")
 
-    path = Path(export_file.file_path)
-    if not path.exists():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Export file not found")
-
+    path = _resolve_export_path(campaign_id, export_file.file_path)
     filename, media_type = _download_meta(export_file.export_type)
     return FileResponse(path, filename=filename, media_type=media_type)
 
@@ -95,3 +89,18 @@ def _download_meta(export_type: str) -> tuple[str, str]:
     if export_type == "campaign_report_md":
         return ("campaign_report.md", "text/markdown")
     return ("archive.json", "application/json")
+
+
+def _resolve_export_path(campaign_id: str, file_path: str) -> Path:
+    exports_root = paths.exports_dir(campaign_id).resolve()
+    resolved = Path(file_path).expanduser().resolve()
+
+    try:
+        resolved.relative_to(exports_root)
+    except ValueError as error:
+        raise not_found("Export file not found") from error
+
+    if not resolved.is_file():
+        raise not_found("Export file not found")
+
+    return resolved

@@ -7,7 +7,7 @@ This FastAPI service now supports campaign setup, research runs, results inspect
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
+pip install -e '.[dev]'
 ```
 
 ## Run
@@ -32,6 +32,16 @@ Other useful Phase 4 environment variables:
 - `MAX_SOURCE_CHARS`
 
 During MVP development, delete `data/prospecting_agent.db` and restart the API if your local SQLite file was created before the latest schema changes. Phase 9 adds review and export routes on top of the existing schema.
+
+## Phase 10 reliability updates
+
+Phase 10 keeps the existing API surface but hardens it with:
+
+- Consistent `400`, `404`, `409`, and `500` responses
+- Validation errors returned as JSON with a top-level `detail`
+- Safer export download path handling
+- Standard logging for important campaign, run, upload, and export events
+- Pytest coverage for the main MVP routes and deterministic scoring logic
 
 ## Health check
 
@@ -197,6 +207,24 @@ curl http://localhost:8000/campaigns/campaign_REPLACE_ME/exports
 
 ```bash
 curl -L http://localhost:8000/campaigns/campaign_REPLACE_ME/exports/export_REPLACE_ME/download
+```
+
+## Seed a demo campaign
+
+```bash
+python3 scripts/seed_demo.py
+```
+
+For a fully populated fake-mode demo:
+
+```bash
+RESEARCH_MODE=fake python3 scripts/seed_demo.py --run-fake-workflow
+```
+
+## Run tests
+
+```bash
+python3 -m pytest
 ```
 
 ## Inspect workspace files

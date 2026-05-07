@@ -20,24 +20,42 @@ export function CsvUploader({ campaignId }: CsvUploaderProps) {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [report, setReport] = useState<UploadReportResponse | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: (selectedFile: File) => uploadCampaignCsv(campaignId, selectedFile),
     onSuccess: (nextReport) => {
+      setLocalError(null);
       setReport(nextReport);
       router.refresh();
     },
   });
+
+  async function handleUpload() {
+    setLocalError(null);
+    if (!file) {
+      setLocalError("Choose a CSV file before uploading.");
+      return;
+    }
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      setLocalError("Uploaded file must use the .csv extension.");
+      return;
+    }
+
+    await mutation.mutateAsync(file);
+  }
 
   return (
     <div className="stack-md">
       <Input
         type="file"
         accept=".csv,text/csv"
+        disabled={mutation.isPending}
         onChange={(event) => {
           const nextFile = event.target.files?.[0] ?? null;
           setFile(nextFile);
           setReport(null);
+          setLocalError(null);
         }}
       />
 
@@ -55,16 +73,9 @@ export function CsvUploader({ campaignId }: CsvUploaderProps) {
         />
       ) : null}
 
-      <Button
-        onClick={async () => {
-          if (!file) {
-            return;
-          }
+      {localError ? <ErrorMessage message={localError} /> : null}
 
-          await mutation.mutateAsync(file);
-        }}
-        disabled={!file || mutation.isPending}
-      >
+      <Button onClick={handleUpload} disabled={!file || mutation.isPending}>
         {mutation.isPending ? "Uploading CSV..." : "Upload CSV"}
       </Button>
 

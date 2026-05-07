@@ -11,20 +11,19 @@ The MVP is intended to let a user create a campaign, upload target companies, ru
 
 ## Current scope
 
-The project currently includes the first five backend phases:
+The project now includes the Phase 10 MVP flow:
 
-- Minimal FastAPI backend with a root endpoint and `GET /health`
-- SQLite-backed backend foundation for campaigns, accounts, events, and future report entities
-- Campaign APIs for create, list, get, and campaign-scoped accounts and events
-- CSV upload, domain normalization, account creation, and campaign workspace files under `data/campaigns`
-- Phase 3 deterministic workflow runs with simulated research, scoring, outreach, and results APIs
-- Phase 4 real public web research mode with Tavily search, Firecrawl scraping, deterministic evidence synthesis, and a configurable fake-mode fallback
-- Phase 5 deterministic scoring, persona recommendation, sales-angle generation, outreach drafting, and quality review on the existing API surfaces
-- Minimal Next.js frontend with a landing page
-- Root documentation, environment examples, and sample CSV data
-- Local project folders for future campaign workspaces
+- Campaign setup, listing, and detail pages
+- CSV upload with duplicate detection and validation
+- Background campaign runs with progress polling
+- Results dashboard and account detail workspaces
+- Supervised review controls and draft editing
+- Local export generation and downloads
+- Backend test coverage for health, campaigns, CSV upload, scoring, review, and exports
+- Frontend typecheck, lint, and small component tests
+- Demo seed script plus sample CSVs for repeatable walkthroughs
 
-The project now includes campaign setup, CSV upload, run progress polling, a results dashboard, account detail pages, supervised review controls, draft editing, and local export generation. CRM integrations, email sending, and production deployment still arrive in later phases.
+CRM integrations, email sending, authentication, billing, and production deployment are still out of scope.
 
 ## Local setup
 
@@ -43,7 +42,7 @@ For Phase 4 there are two research modes:
 cd apps/api
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
+pip install -e '.[dev]'
 uvicorn app.main:app --reload
 ```
 
@@ -65,6 +64,42 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev
 
 - Backend health: [http://localhost:8000/health](http://localhost:8000/health)
 - Frontend: [http://localhost:3000](http://localhost:3000)
+
+## Demo seed
+
+To create a demo campaign and preload accounts:
+
+```bash
+cd apps/api
+python3 scripts/seed_demo.py
+```
+
+To also run the deterministic fake workflow:
+
+```bash
+cd apps/api
+RESEARCH_MODE=fake python3 scripts/seed_demo.py --run-fake-workflow
+```
+
+The script prints the campaign, run, and results URLs for the browser.
+
+## Verification
+
+Backend:
+
+```bash
+cd apps/api
+python3 -m pytest
+```
+
+Frontend:
+
+```bash
+cd apps/web
+npm run typecheck
+npm run lint
+npm run test
+```
 
 ## Browser workflow
 

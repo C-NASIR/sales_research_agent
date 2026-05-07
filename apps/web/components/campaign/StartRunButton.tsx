@@ -21,7 +21,8 @@ export function StartRunButton({
   accountCount,
 }: StartRunButtonProps) {
   const router = useRouter();
-  const isDisabled = accountCount === 0 || campaignStatus === "draft";
+  const isDisabled =
+    accountCount === 0 || campaignStatus === "draft" || campaignStatus === "running";
 
   const mutation = useMutation({
     mutationFn: () => startCampaignRun(campaignId),
@@ -38,6 +39,8 @@ export function StartRunButton({
     buttonText = "Upload companies first";
   } else if (campaignStatus === "draft") {
     buttonText = "Campaign is not ready";
+  } else if (campaignStatus === "running") {
+    buttonText = "Run already in progress";
   }
 
   return (
@@ -55,7 +58,6 @@ export function StartRunButton({
           }
         />
       ) : null}
-
     </div>
   );
 }
