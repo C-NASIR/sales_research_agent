@@ -43,6 +43,12 @@ class Settings:
     database_url: str
     model_name: str
     use_deep_agents: bool
+    research_mode: str
+    tavily_api_key: str
+    firecrawl_api_key: str
+    max_search_results: int
+    max_scraped_pages_per_account: int
+    max_source_chars: int
 
 
 data_dir = _resolve_data_dir(os.getenv("DATA_DIR", "./data"))
@@ -57,4 +63,10 @@ settings = Settings(
     ),
     model_name=os.getenv("MODEL_NAME", "openai:gpt-4.1-mini"),
     use_deep_agents=_parse_bool(os.getenv("USE_DEEP_AGENTS", "false")),
+    research_mode=os.getenv("RESEARCH_MODE", "real").strip().lower(),
+    tavily_api_key=os.getenv("TAVILY_API_KEY", ""),
+    firecrawl_api_key=os.getenv("FIRECRAWL_API_KEY", ""),
+    max_search_results=int(os.getenv("MAX_SEARCH_RESULTS", "5")),
+    max_scraped_pages_per_account=int(os.getenv("MAX_SCRAPED_PAGES_PER_ACCOUNT", "4")),
+    max_source_chars=int(os.getenv("MAX_SOURCE_CHARS", "12000")),
 )

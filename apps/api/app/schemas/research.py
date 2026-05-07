@@ -19,6 +19,7 @@ class ResearchReportResponse(BaseModel):
     evidence: list[Any] | None
     risks: list[Any] | None
     confidence: float | None
+    sources: list[Any] | None = None
     workspace_file: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
@@ -35,6 +36,7 @@ class SignalReportResponse(BaseModel):
     timing_score: float | None
     why_now: str | None
     confidence: float | None
+    sources: list[Any] | None = None
     workspace_file: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None

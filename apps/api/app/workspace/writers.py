@@ -31,6 +31,10 @@ def write_research_report(campaign_id: str, account_id: str, data: dict[str, Any
     return write_json(paths.research_dir(campaign_id) / f"{account_id}.json", data)
 
 
+def write_research_sources(campaign_id: str, account_id: str, data: dict[str, Any]) -> Path:
+    return write_json(paths.research_sources_dir(campaign_id) / f"{account_id}.json", data)
+
+
 def write_signal_report(campaign_id: str, account_id: str, data: dict[str, Any]) -> Path:
     return write_json(paths.signals_dir(campaign_id) / f"{account_id}.json", data)
 

@@ -1,6 +1,6 @@
 # Prospecting Agent API
 
-This FastAPI service provides the Phase 3 backend foundation for Prospecting Agent.
+This FastAPI service provides the Phase 4 backend foundation for Prospecting Agent.
 
 ## Install
 
@@ -17,6 +17,19 @@ uvicorn app.main:app --reload
 ```
 
 The API starts on `http://localhost:8000` by default.
+
+## Research mode
+
+Phase 4 supports two backend research modes:
+
+- `RESEARCH_MODE=fake` keeps the deterministic Phase 3 behavior and does not require API keys.
+- `RESEARCH_MODE=real` runs public web search and scraping and requires both `TAVILY_API_KEY` and `FIRECRAWL_API_KEY`.
+
+Other useful Phase 4 environment variables:
+
+- `MAX_SEARCH_RESULTS`
+- `MAX_SCRAPED_PAGES_PER_ACCOUNT`
+- `MAX_SOURCE_CHARS`
 
 ## Health check
 
@@ -75,6 +88,8 @@ curl http://localhost:8000/campaigns/campaign_REPLACE_ME/events
 curl -X POST http://localhost:8000/campaigns/campaign_REPLACE_ME/runs
 ```
 
+With `RESEARCH_MODE=real`, a misconfigured backend returns a clear run failure instead of crashing at import time.
+
 ## Get results
 
 ```bash
@@ -101,8 +116,11 @@ data/campaigns/campaign_REPLACE_ME/input/upload_report.json
 data/campaigns/campaign_REPLACE_ME/plan/todos.json
 data/campaigns/campaign_REPLACE_ME/plan/icp.json
 data/campaigns/campaign_REPLACE_ME/research/account_REPLACE_ME.json
+data/campaigns/campaign_REPLACE_ME/research/sources/account_REPLACE_ME.json
 data/campaigns/campaign_REPLACE_ME/signals/account_REPLACE_ME.json
 data/campaigns/campaign_REPLACE_ME/scores/account_REPLACE_ME.json
 data/campaigns/campaign_REPLACE_ME/outreach/account_REPLACE_ME.json
 data/campaigns/campaign_REPLACE_ME/review/account_REPLACE_ME.json
 ```
+
+The `research/sources` file is intended for debugging source collection. The main research and signal reports keep only source metadata and source-backed evidence, not full scraped page dumps.

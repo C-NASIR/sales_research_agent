@@ -12,7 +12,12 @@ from app.agents.schemas import (
     TodoItem,
 )
 from app.tools.fake_research_tools import build_company_profile
-from app.tools.scoring_tools import calculate_overall_score
+from app.tools.scoring_tools import (
+    calculate_confidence_score,
+    calculate_fit_score,
+    calculate_overall_score,
+    calculate_persona_score,
+)
 
 
 def build_fake_todos() -> list[dict]:
@@ -74,7 +79,9 @@ def fake_account_researcher(account: dict, icp: dict) -> dict:
                     f"{icp['target_personas'][0] if icp.get('target_personas') else 'technical buyers'}."
                 ),
                 "source_url": homepage,
+                "source_title": company_name,
                 "confidence": "medium",
+                "evidence_type": "homepage",
             }
         ],
         evidence=[
@@ -82,7 +89,9 @@ def fake_account_researcher(account: dict, icp: dict) -> dict:
                 "claim": "Public company website exists",
                 "evidence": f"The uploaded domain for this account is {domain}. Real verification is deferred to Phase 4.",
                 "source_url": homepage,
+                "source_title": company_name,
                 "confidence": "medium",
+                "evidence_type": "homepage",
             }
         ],
         risks=[
@@ -93,6 +102,7 @@ def fake_account_researcher(account: dict, icp: dict) -> dict:
             )
         ],
         confidence=65 if company_name.lower() not in {"sentry", "posthog", "linear", "retool", "vercel"} else 74,
+        sources=[{"url": homepage, "title": company_name, "source": "phase3_fake"}],
     )
     return report.model_dump(mode="json")
 
@@ -118,16 +128,17 @@ def fake_signal_detector(account: dict, research_report: dict, icp: dict) -> dic
             "Timing analysis is simulated in Phase 3 and should be treated as a placeholder until real research is added."
         ),
         confidence=60,
+        sources=[{"url": domain_url, "title": account["company_name"], "source": "phase3_fake"}],
     )
     return report.model_dump(mode="json")
 
 
 def fake_scoring_analyst(account: dict, research_report: dict, signal_report: dict, icp: dict) -> dict:
     profile = build_company_profile(account["company_name"], account["domain"])
-    fit_score = 82 if account["company_name"].lower() in {"sentry", "posthog", "linear", "retool", "vercel"} else 70
+    fit_score = calculate_fit_score(research_report.get("fit_claims"))
     timing_score = int(signal_report["timing_score"])
-    confidence_score = min(100, int(research_report["confidence"]) + 5)
-    persona_score = 80 if profile["recommended_persona"] in icp.get("target_personas", []) else 72
+    confidence_score = calculate_confidence_score(research_report.get("evidence"))
+    persona_score = calculate_persona_score(icp.get("target_personas", []), profile["recommended_persona"])
     overall_score = calculate_overall_score(fit_score, timing_score, confidence_score, persona_score)
     report = ScoreReportData(
         company_name=account["company_name"],
@@ -160,25 +171,51 @@ def fake_outreach_writer(
     score_report: dict,
 ) -> dict:
     subject = f"{score_report['sales_angle']} at {account['company_name']}"
-    body = (
-        f"Hi there,\n\n"
-        f"I’m reviewing teams that may care about {score_report['sales_angle'].lower()}. "
-        f"{account['company_name']} looks relevant because the Phase 3 simulated research suggests a technical product surface. "
-        f"We help engineering teams reduce review bottlenecks and keep code quality consistent.\n\n"
-        f"Worth a quick comparison?\n"
-    )
+    evidence_items = research_report.get("evidence") or []
+    simulated = "simulated" in (research_report.get("company_summary", "") or "").lower()
+    if simulated:
+        body = (
+            f"Hi there,\n\n"
+            f"I’m reviewing teams that may care about {score_report['sales_angle'].lower()}. "
+            f"{account['company_name']} looks relevant because the Phase 3 simulated research suggests a technical product surface. "
+            f"We help engineering teams reduce review bottlenecks and keep code quality consistent.\n\n"
+            f"Worth a quick comparison?\n"
+        )
+        personalization_source = (
+            f"Phase 3 simulated research based on uploaded company name, domain, and campaign tone '{brief['tone']}'."
+        )
+    elif evidence_items:
+        anchor = evidence_items[0]
+        body = (
+            f"Hi there,\n\n"
+            f"I came across {account['company_name']} while researching teams in this market. "
+            f"One public source suggests: {anchor['evidence'][:120]}. "
+            f"We help engineering teams reduce review bottlenecks and keep code quality consistent.\n\n"
+            f"Worth a quick comparison?\n"
+        )
+        personalization_source = f"{anchor.get('source_title') or account['company_name']} - {anchor['source_url']}"
+    else:
+        body = (
+            f"Hi there,\n\n"
+            f"I came across {account['company_name']} while researching teams in this market. "
+            f"We help engineering teams reduce review bottlenecks and keep code quality consistent.\n\n"
+            f"Worth a quick comparison?\n"
+        )
+        personalization_source = ""
     draft = OutreachDraftData(
         company_name=account["company_name"],
         domain=account["domain"],
         subject=subject,
         body=body[:700],
-        personalization_source=(
-            f"Phase 3 simulated research based on uploaded company name, domain, and campaign tone '{brief['tone']}'."
-        ),
+        personalization_source=personalization_source,
         sales_angle=score_report["sales_angle"],
         risk_notes=[
-            "Draft is based on simulated research, not verified web evidence.",
-            f"Timing explanation is placeholder text: {signal_report['why_now']}",
+            (
+                "Draft is based on simulated research, not verified web evidence."
+                if simulated
+                else "Draft quality depends on the strength of the cited public evidence."
+            ),
+            f"Timing explanation: {signal_report['why_now']}",
         ],
     )
     return draft.model_dump(mode="json")
@@ -202,6 +239,18 @@ def fake_compliance_reviewer(outreach_draft: dict, research_report: dict, signal
         issues.append("Personalization source is empty.")
     if any(phrase in body_text for phrase in banned_phrases):
         issues.append("Body contains unsupported familiarity language.")
+    evidence_items = research_report.get("evidence") or []
+    if not evidence_items:
+        issues.append("Research evidence is empty.")
+    if any(not item.get("source_url") for item in evidence_items):
+        issues.append("At least one evidence item is missing a source URL.")
+    if research_report.get("confidence", 0) < 50:
+        issues.append("Research confidence is low.")
+    unsupported_pain_terms = ["struggling", "pain", "suffering", "blocked by"]
+    if any(term in body_text for term in unsupported_pain_terms):
+        evidence_text = " ".join(item.get("evidence", "").lower() for item in evidence_items)
+        if not any(term in evidence_text for term in unsupported_pain_terms):
+            issues.append("Draft claims pain that is not directly supported by evidence.")
 
     quality_status = "approved_by_reviewer" if not issues else "flagged"
     review = QualityReviewData(

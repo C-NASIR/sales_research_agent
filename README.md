@@ -1,6 +1,6 @@
 # Prospecting Agent
 
-Prospecting Agent is a local full-stack sales research workspace that will eventually coordinate account research, scoring, outreach drafting, review, and export workflows.
+Prospecting Agent is a local full-stack sales research workspace that coordinates account research, scoring, outreach drafting, review, and later export workflows.
 
 ## MVP goal
 
@@ -8,24 +8,30 @@ The MVP is intended to let a user create a campaign, upload target companies, ru
 
 ## Current scope
 
-The project currently includes the first three backend phases:
+The project currently includes the first four backend phases:
 
 - Minimal FastAPI backend with a root endpoint and `GET /health`
 - SQLite-backed backend foundation for campaigns, accounts, events, and future report entities
 - Campaign APIs for create, list, get, and campaign-scoped accounts and events
 - CSV upload, domain normalization, account creation, and campaign workspace files under `data/campaigns`
-- Deterministic Phase 3 workflow runs with simulated research, scoring, outreach, and results APIs
+- Phase 3 deterministic workflow runs with simulated research, scoring, outreach, and results APIs
+- Phase 4 real public web research mode with Tavily search, Firecrawl scraping, deterministic evidence synthesis, and a configurable fake-mode fallback
 - Minimal Next.js frontend with a landing page
 - Root documentation, environment examples, and sample CSV data
 - Local project folders for future campaign workspaces
 
-The project does not include CSV upload flows, Deep Agents, authentication, CRM integrations, or production deployment yet.
+The project does not include frontend campaign screens, review approvals, export workflow, CRM integrations, or production deployment yet.
 
 ## Local setup
 
 1. Copy `.env.example` to `.env` if you want to customize local values.
 2. Start the backend from `apps/api`.
 3. Start the frontend from `apps/web`.
+
+For Phase 4 there are two research modes:
+
+- `RESEARCH_MODE=fake` keeps the deterministic no-key workflow from Phase 3.
+- `RESEARCH_MODE=real` uses Tavily and Firecrawl for public web research and requires `TAVILY_API_KEY` plus `FIRECRAWL_API_KEY`.
 
 ## Backend run instructions
 

@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.agents.coordinator import run_campaign_workflow
 from app.db.models import CampaignRun
 from app.services import campaign_service, event_service
+from app.services.research_service import ResearchConfigurationError
 from app.utils.ids import new_id
 from app.utils.timestamps import utc_now
 
@@ -60,6 +61,26 @@ def run_campaign_now(db: Session, campaign_id: str) -> CampaignRun:
         if refreshed is None:
             raise RunServiceError(status_code=500, detail="Run record disappeared during execution")
         return refreshed
+    except ResearchConfigurationError as exc:
+        update_run_status(db, run, "failed", completed=True, error_message=str(exc))
+        campaign_service.update_campaign_status(db, campaign_id, "failed")
+        event_service.record_event(
+            db,
+            campaign_id,
+            "research_tool_failed",
+            "Real research mode is not configured correctly",
+            payload={"error": str(exc)},
+            run_id=run.id,
+        )
+        event_service.record_event(
+            db,
+            campaign_id,
+            "run_failed",
+            "Campaign run failed",
+            payload={"error": str(exc)},
+            run_id=run.id,
+        )
+        raise RunServiceError(status_code=500, detail=str(exc)) from exc
     except RunServiceError:
         raise
     except Exception as exc:

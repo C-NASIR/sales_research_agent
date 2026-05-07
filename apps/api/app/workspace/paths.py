@@ -21,6 +21,10 @@ def research_dir(campaign_id: str) -> Path:
     return campaign_workspace(campaign_id) / "research"
 
 
+def research_sources_dir(campaign_id: str) -> Path:
+    return research_dir(campaign_id) / "sources"
+
+
 def signals_dir(campaign_id: str) -> Path:
     return campaign_workspace(campaign_id) / "signals"
 

@@ -1,6 +1,6 @@
 # API contracts
 
-## Implemented in Phase 3
+## Implemented in Phase 4
 
 ### `GET /health`
 
@@ -88,7 +88,11 @@ The upload endpoint writes:
 
 ### `POST /campaigns/{campaign_id}/runs`
 
-Starts a synchronous Phase 3 deterministic fake workflow run. The default path does not require API keys and does not call real web research tools.
+Starts a synchronous campaign workflow run.
+
+- With `RESEARCH_MODE=fake`, the run uses the deterministic Phase 3 workflow and does not require API keys.
+- With `RESEARCH_MODE=real`, the run performs public web search, scraping, evidence extraction, deterministic report synthesis, scoring, outreach drafting, and quality review.
+- With `RESEARCH_MODE=real` and missing required keys, the run fails cleanly with a persisted failed run and error events.
 
 ### `GET /campaigns/{campaign_id}/runs/{run_id}`
 
@@ -110,7 +114,7 @@ Returns the persisted run record:
 
 ### `GET /campaigns/{campaign_id}/results`
 
-Returns ranked account results sorted by `overall_score` descending:
+Returns ranked account results sorted by `overall_score` descending. In Phase 4, low-confidence fallback accounts may still appear with low scores and flagged drafts if research tools failed for that account:
 
 ```json
 {
@@ -138,7 +142,7 @@ Returns ranked account results sorted by `overall_score` descending:
 
 ### `GET /campaigns/{campaign_id}/accounts/{account_id}`
 
-Returns the account row plus the Phase 3 simulated sections:
+Returns the account row plus the run artifacts:
 
 - `account`
 - `research_report`
@@ -146,6 +150,22 @@ Returns the account row plus the Phase 3 simulated sections:
 - `score_report`
 - `outreach_draft`
 - `quality_review`
+
+In Phase 4, `research_report` and `signal_report` include a `sources` array, and research evidence items preserve `source_url`.
+
+### `GET /campaigns/{campaign_id}/events`
+
+Phase 4 extends activity events with real-research steps, including:
+
+- `web_search_started`
+- `web_search_completed`
+- `web_scrape_started`
+- `web_scrape_completed`
+- `evidence_extracted`
+- `research_synthesis_completed`
+- `signal_synthesis_completed`
+- `research_low_confidence`
+- `research_tool_failed`
 
 ## Planned, not implemented yet
 

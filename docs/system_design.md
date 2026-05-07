@@ -16,29 +16,33 @@ The frontend provides a basic landing page that confirms the project shell is ru
 - Campaign APIs for creating and reading campaigns plus listing campaign accounts and events
 - Phase 2 campaign workspace creation under `data/campaigns/{campaign_id}`
 - CSV input processing that normalizes company rows, detects duplicates, creates account records, and writes input artifacts to disk
-- A Phase 3 deterministic workflow that reads the workspace, generates fake structured research outputs, persists result rows, and exposes ranked results through the API
+- A Phase 3 deterministic workflow that remains available as a fallback path
+- A Phase 4 real research workflow that searches the public web, scrapes selected pages, extracts deterministic evidence, synthesizes reports, persists result rows, and exposes ranked results through the API
 
-## Phase 3 workflow
+## Workflow modes
 
 - The coordinator reads `input/brief.json` and `input/normalized_accounts.json`
 - It writes `plan/todos.json` and `plan/icp.json`
-- Each account gets simulated research, signal, score, outreach, and review JSON files
-- The fake workflow is deterministic by default and does not require API keys
-- Optional Deep Agents wiring exists for future phases, but local validation stays on the fake path
+- `RESEARCH_MODE=fake` keeps the deterministic Phase 3 account researcher and signal detector
+- `RESEARCH_MODE=real` runs Tavily search, Firecrawl scraping with `httpx` and BeautifulSoup fallback, deterministic snippet extraction, and deterministic report synthesis
+- Each account gets research, signal, score, outreach, and review JSON files
+- Real mode also writes `research/sources/{account_id}.json` for debugging source collection without bloating the primary report files
+- Optional Deep Agents wiring still exists, but the default local workflow remains deterministic
 
 ## Subagent responsibilities
 
 - ICP strategist: campaign rubric and target criteria
-- Account researcher: simulated company summary and fake evidence
-- Signal detector: simulated timing signal and why-now note
-- Scoring analyst: deterministic weighted scores
-- Outreach writer: short draft based on simulated research
-- Compliance reviewer: basic quality and familiarity checks
+- Account researcher: fake simulated research or real public-source synthesis depending on configuration
+- Signal detector: fake timing signals or real source-backed timing signals depending on configuration
+- Scoring analyst: deterministic weighted scores based on fit claims, signal timing, evidence count, and persona alignment
+- Outreach writer: short draft anchored to research evidence when available
+- Compliance reviewer: checks personalization, unsupported familiarity, missing sources, and weak evidence
 
 ## Persistence
 
 - Campaign runs are stored in SQLite as `CampaignRun`
 - Structured results are upserted into `ResearchReport`, `SignalReport`, `ScoreReport`, and `OutreachDraft`
+- Real source URLs are preserved inside the JSON evidence and signal payloads stored in SQLite
 - Quality review remains a workspace file under `review/{account_id}.json`
 
 ## Planned expansion

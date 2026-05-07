@@ -4,6 +4,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict
 
+from app.schemas.source import SearchResult
+
 
 class TodoItem(BaseModel):
     id: str
@@ -23,7 +25,9 @@ class EvidenceItem(BaseModel):
     claim: str
     evidence: str
     source_url: str
+    source_title: str | None = None
     confidence: str
+    evidence_type: str = "unknown"
 
 
 class RiskItem(BaseModel):
@@ -43,6 +47,7 @@ class ResearchReportData(BaseModel):
     evidence: list[EvidenceItem]
     risks: list[RiskItem]
     confidence: int
+    sources: list[SearchResult | dict[str, Any]]
 
 
 class SignalItem(BaseModel):
@@ -60,6 +65,7 @@ class SignalReportData(BaseModel):
     timing_score: int
     why_now: str
     confidence: int
+    sources: list[SearchResult | dict[str, Any]]
 
 
 class ScoreReportData(BaseModel):
