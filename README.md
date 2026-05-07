@@ -2,6 +2,9 @@
 
 Prospecting Agent is a local full-stack sales research workspace that coordinates account research, scoring, outreach drafting, review, and later export workflows.
 
+## How it works 
+A user can give the system a product, an ideal customer profile, and a list of companies. The system researches those companies, scores them, explains the reasoning, drafts outreach, lets the user review the work, and exports a usable prospecting file.
+
 ## MVP goal
 
 The MVP is intended to let a user create a campaign, upload target companies, run research, review results, and export approved prospects from one local workspace.
