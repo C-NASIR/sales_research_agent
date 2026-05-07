@@ -34,6 +34,14 @@ Related entities: campaign, research_report, signal_report, score_report, outrea
 
 Phase 2 creates `Account` rows from uploaded CSV files after domain normalization and duplicate filtering.
 
+Phase 9 uses `review_status` as a supervised workflow field with these allowed values:
+
+- `unreviewed`
+- `approved`
+- `rejected`
+- `needs_edit`
+- `not_enough_evidence`
+
 ## CampaignRun
 
 - `id`
@@ -120,6 +128,8 @@ Phase 4 preserves source URLs inside signal items stored in the `signals` JSON f
 - `created_at`
 - `updated_at`
 
+Phase 9 allows the user to update `subject`, `body`, `personalization_source`, `personalization_source_url`, and `sales_angle`, then reruns quality review against the edited draft.
+
 ## ExportFile
 
 - `id`
@@ -127,6 +137,12 @@ Phase 4 preserves source URLs inside signal items stored in the `signals` JSON f
 - `export_type`
 - `file_path`
 - `created_at`
+
+Phase 9 creates or updates one `ExportFile` row per generated export artifact:
+
+- `prospects_csv`
+- `campaign_report_md`
+- `archive_json`
 
 ## Workspace files
 
@@ -147,5 +163,8 @@ Phase 3 and Phase 4 write run artifacts under:
 - `data/campaigns/{campaign_id}/scores/{account_id}.json`
 - `data/campaigns/{campaign_id}/outreach/{account_id}.json`
 - `data/campaigns/{campaign_id}/review/{account_id}.json`
+- `data/campaigns/{campaign_id}/exports/prospects.csv`
+- `data/campaigns/{campaign_id}/exports/campaign_report.md`
+- `data/campaigns/{campaign_id}/exports/archive.json`
 
 No migration framework exists yet. If an older local SQLite database does not match the current SQLAlchemy models during MVP development, the expected recovery path is to delete the local database and rerun the app. Phase 5 adds `personalization_source_url` to `OutreachDraft`, so older local SQLite files should be recreated.

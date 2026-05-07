@@ -7,6 +7,7 @@ import { formatStatus } from "@/lib/format";
 export type ResultsFilterState = {
   searchTerm: string;
   researchStatus: string;
+  reviewStatus: string;
   draftQualityStatus: string;
   minOverallScore: string;
 };
@@ -14,6 +15,7 @@ export type ResultsFilterState = {
 type ResultsFiltersProps = {
   filters: ResultsFilterState;
   researchStatuses: string[];
+  reviewStatuses: string[];
   qualityStatuses: string[];
   onChange: (filters: ResultsFilterState) => void;
 };
@@ -21,6 +23,7 @@ type ResultsFiltersProps = {
 export function ResultsFilters({
   filters,
   researchStatuses,
+  reviewStatuses,
   qualityStatuses,
   onChange,
 }: ResultsFiltersProps) {
@@ -62,6 +65,24 @@ export function ResultsFilters({
           >
             <option value="all">All statuses</option>
             {researchStatuses.map((status) => (
+              <option key={status} value={status}>
+                {formatStatus(status)}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Review status" htmlFor="review-status-filter">
+          <select
+            id="review-status-filter"
+            className="input"
+            value={filters.reviewStatus}
+            onChange={(event) =>
+              onChange({ ...filters, reviewStatus: event.target.value })
+            }
+          >
+            <option value="all">All review states</option>
+            {reviewStatuses.map((status) => (
               <option key={status} value={status}>
                 {formatStatus(status)}
               </option>

@@ -65,3 +65,16 @@ export function truncateText(value: string, maxLength: number): string {
 
   return `${value.slice(0, Math.max(0, maxLength - 3)).trimEnd()}...`;
 }
+
+export function formatExportType(value: string): string {
+  switch (value) {
+    case "prospects_csv":
+      return "Prospects CSV";
+    case "campaign_report_md":
+      return "Campaign report";
+    case "archive_json":
+      return "Archive JSON";
+    default:
+      return formatStatus(value);
+  }
+}

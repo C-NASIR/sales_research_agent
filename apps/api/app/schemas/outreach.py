@@ -25,6 +25,14 @@ class OutreachDraftResponse(BaseModel):
     updated_at: datetime | None = None
 
 
+class OutreachDraftUpdate(BaseModel):
+    subject: str | None = None
+    body: str | None = None
+    personalization_source: str | None = None
+    personalization_source_url: str | None = None
+    sales_angle: str | None = None
+
+
 class QualityReviewResponse(BaseModel):
     company_name: str
     domain: str

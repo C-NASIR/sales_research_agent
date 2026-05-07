@@ -7,7 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.accounts import router as accounts_router
 from app.api.campaigns import router as campaigns_router
 from app.api.events import router as events_router
+from app.api.exports import router as exports_router
 from app.api.health import router as health_router
+from app.api.reviews import router as reviews_router
 from app.api.results import router as results_router
 from app.api.runs import router as runs_router
 from app.api.todos import router as todos_router
@@ -38,6 +40,8 @@ app.include_router(uploads_router)
 app.include_router(runs_router)
 app.include_router(todos_router)
 app.include_router(results_router)
+app.include_router(reviews_router)
+app.include_router(exports_router)
 
 
 @app.get("/")

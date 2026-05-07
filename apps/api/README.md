@@ -1,6 +1,6 @@
 # Prospecting Agent API
 
-This FastAPI service provides the Phase 4 backend foundation for Prospecting Agent.
+This FastAPI service now supports campaign setup, research runs, results inspection, supervised review updates, draft editing, and export generation for Prospecting Agent.
 
 ## Install
 
@@ -31,7 +31,7 @@ Other useful Phase 4 environment variables:
 - `MAX_SCRAPED_PAGES_PER_ACCOUNT`
 - `MAX_SOURCE_CHARS`
 
-During MVP development, delete `data/prospecting_agent.db` and restart the API if your local SQLite file was created before the latest schema changes. Phase 5 adds `personalization_source_url` to the outreach draft table.
+During MVP development, delete `data/prospecting_agent.db` and restart the API if your local SQLite file was created before the latest schema changes. Phase 9 adds review and export routes on top of the existing schema.
 
 ## Health check
 
@@ -154,6 +154,49 @@ Replace the account id:
 
 ```bash
 curl http://localhost:8000/campaigns/campaign_REPLACE_ME/accounts/account_REPLACE_ME
+```
+
+## Update review status
+
+```bash
+curl -X PATCH http://localhost:8000/campaigns/campaign_REPLACE_ME/accounts/account_REPLACE_ME/review \
+  -H "Content-Type: application/json" \
+  -d '{
+    "review_status": "approved"
+  }'
+```
+
+## Update draft
+
+```bash
+curl -X PATCH http://localhost:8000/campaigns/campaign_REPLACE_ME/accounts/account_REPLACE_ME/draft \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subject": "Engineering workflow quality",
+    "body": "Hi there,\n\nI came across your company while researching developer focused software teams.\n\nWe help engineering teams reduce review bottlenecks and keep code quality consistent.\n\nWorth comparing notes?"
+  }'
+```
+
+## Create export
+
+```bash
+curl -X POST http://localhost:8000/campaigns/campaign_REPLACE_ME/exports \
+  -H "Content-Type: application/json" \
+  -d '{
+    "include_review_statuses": ["approved"]
+  }'
+```
+
+## List exports
+
+```bash
+curl http://localhost:8000/campaigns/campaign_REPLACE_ME/exports
+```
+
+## Download export
+
+```bash
+curl -L http://localhost:8000/campaigns/campaign_REPLACE_ME/exports/export_REPLACE_ME/download
 ```
 
 ## Inspect workspace files

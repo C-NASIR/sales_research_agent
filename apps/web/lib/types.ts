@@ -41,7 +41,7 @@ export type Account = {
   company_name: string;
   domain: string;
   research_status: string;
-  review_status: string;
+  review_status: ReviewStatus;
   created_at: string;
   updated_at: string;
 };
@@ -133,7 +133,7 @@ export type AccountResult = {
   persona_score: number | null;
   recommended_persona: string | null;
   sales_angle: string | null;
-  review_status: string;
+  review_status: ReviewStatus;
   research_status: string;
   draft_quality_status: string | null;
 };
@@ -217,6 +217,7 @@ export type OutreachDraft = {
   risk_notes: string[];
   quality_status: string | null;
   workspace_file?: string | null;
+  updated_at?: string | null;
 };
 
 export type QualityReview = {
@@ -235,4 +236,49 @@ export type AccountDetailResponse = {
   score_report: ScoreReport | null;
   outreach_draft: OutreachDraft | null;
   quality_review: QualityReview | null;
+};
+
+export type ReviewStatus =
+  | "unreviewed"
+  | "approved"
+  | "rejected"
+  | "needs_edit"
+  | "not_enough_evidence";
+
+export type ReviewStatusResponse = {
+  account_id: string;
+  campaign_id: string;
+  review_status: ReviewStatus;
+  updated_at: string;
+};
+
+export type OutreachDraftUpdate = {
+  subject?: string;
+  body?: string;
+  personalization_source?: string;
+  personalization_source_url?: string | null;
+  sales_angle?: string;
+};
+
+export type ExportCreateRequest = {
+  include_review_statuses: ReviewStatus[];
+};
+
+export type ExportFile = {
+  id: string;
+  campaign_id: string;
+  export_type: string;
+  file_path: string;
+  download_url: string;
+  created_at: string;
+};
+
+export type ExportCreateResponse = {
+  campaign_id: string;
+  exports: ExportFile[];
+};
+
+export type ExportListResponse = {
+  campaign_id: string;
+  exports: ExportFile[];
 };

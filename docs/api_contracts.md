@@ -198,6 +198,99 @@ In Phase 5, `score_report` includes a structured `score_breakdown`, `recommended
 
 The frontend renders these sections read-only in Phase 8. No review mutation, draft editing, export creation, or email sending is attached to this response yet.
 
+### `PATCH /campaigns/{campaign_id}/accounts/{account_id}/review`
+
+Phase 9 adds supervised account review updates.
+
+Request:
+
+```json
+{
+  "review_status": "approved"
+}
+```
+
+Allowed statuses:
+
+- `unreviewed`
+- `approved`
+- `rejected`
+- `needs_edit`
+- `not_enough_evidence`
+
+The endpoint updates the account review status, updates the account timestamp, and records an `account_review_updated` event.
+
+### `PATCH /campaigns/{campaign_id}/accounts/{account_id}/draft`
+
+Phase 9 adds read-write draft editing for the generated outreach artifact.
+
+Request fields are optional, but at least one must be present:
+
+- `subject`
+- `body`
+- `personalization_source`
+- `personalization_source_url`
+- `sales_angle`
+
+The endpoint updates only provided fields, rewrites the workspace outreach file, reruns quality review, updates draft quality status, and records `draft_updated` plus `quality_review_updated` events.
+
+### `POST /campaigns/{campaign_id}/exports`
+
+Creates export files for accounts matching the requested review statuses.
+
+Default request behavior when omitted:
+
+```json
+{
+  "include_review_statuses": ["approved"]
+}
+```
+
+Response:
+
+```json
+{
+  "campaign_id": "campaign_...",
+  "exports": [
+    {
+      "id": "export_...",
+      "campaign_id": "campaign_...",
+      "export_type": "prospects_csv",
+      "file_path": "data/campaigns/campaign_.../exports/prospects.csv",
+      "download_url": "/campaigns/campaign_.../exports/export_.../download",
+      "created_at": "2026-05-07T17:03:25.390732"
+    }
+  ]
+}
+```
+
+Phase 9 generates:
+
+- `prospects.csv`
+- `campaign_report.md`
+- `archive.json`
+
+If no accounts match the requested statuses, the endpoint returns `400` with `No accounts are available for export.`
+
+### `GET /campaigns/{campaign_id}/exports`
+
+Returns export metadata newest first:
+
+```json
+{
+  "campaign_id": "campaign_...",
+  "exports": []
+}
+```
+
+### `GET /campaigns/{campaign_id}/exports/{export_id}/download`
+
+Downloads the stored export file with a useful filename and a matching media type where easy:
+
+- `text/csv`
+- `text/markdown`
+- `application/json`
+
 ### `GET /campaigns/{campaign_id}/events`
 
 Phase 4 extends activity events with real-research steps, including:
@@ -224,5 +317,5 @@ Phase 5 adds or updates downstream workflow events, including:
 
 ## Planned, not implemented yet
 
-- `PATCH /campaigns/{campaign_id}/accounts/{account_id}/review`
-- `POST /campaigns/{campaign_id}/exports`
+- Review-side bulk actions
+- CRM sync and send workflows

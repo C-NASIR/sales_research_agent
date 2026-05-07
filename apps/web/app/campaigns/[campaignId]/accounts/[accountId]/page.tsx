@@ -1,13 +1,7 @@
 import Link from "next/link";
 
+import { AccountDetailWorkspace } from "@/components/account/AccountDetailWorkspace";
 import { AccountHeader } from "@/components/account/AccountHeader";
-import { EvidenceList } from "@/components/account/EvidenceList";
-import { OutreachPreview } from "@/components/account/OutreachPreview";
-import { QualityReviewPanel } from "@/components/account/QualityReviewPanel";
-import { ResearchSummary } from "@/components/account/ResearchSummary";
-import { RiskList } from "@/components/account/RiskList";
-import { ScoreBreakdown } from "@/components/account/ScoreBreakdown";
-import { SignalList } from "@/components/account/SignalList";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
@@ -55,19 +49,10 @@ export default async function AccountDetailPage({
         </section>
 
         <AccountHeader account={detail.account} scoreReport={detail.score_report} />
-
-        <div className="account-detail-grid">
-          <ResearchSummary report={detail.research_report} />
-          <SignalList report={detail.signal_report} />
-        </div>
-
-        <EvidenceList report={detail.research_report} />
-        <ScoreBreakdown report={detail.score_report} />
-        <OutreachPreview draft={detail.outreach_draft} />
-        <QualityReviewPanel review={detail.quality_review} />
-        <RiskList
-          researchReport={detail.research_report}
-          outreachDraft={detail.outreach_draft}
+        <AccountDetailWorkspace
+          accountId={accountId}
+          campaignId={campaignId}
+          initialDetail={detail}
         />
       </main>
     );

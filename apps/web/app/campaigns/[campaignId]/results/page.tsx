@@ -4,7 +4,7 @@ import { ResultsWorkspace } from "@/components/results/ResultsWorkspace";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
-import { ApiError, getCampaign, getCampaignResults } from "@/lib/api";
+import { ApiError, getCampaign, getCampaignResults, listCampaignExports } from "@/lib/api";
 import { formatStatus } from "@/lib/format";
 
 type CampaignResultsPageProps = {
@@ -19,9 +19,10 @@ export default async function CampaignResultsPage({
   const { campaignId } = await params;
 
   try {
-    const [campaign, results] = await Promise.all([
+    const [campaign, results, exportsResponse] = await Promise.all([
       getCampaign(campaignId),
       getCampaignResults(campaignId),
+      listCampaignExports(campaignId),
     ]);
 
     return (
@@ -49,7 +50,11 @@ export default async function CampaignResultsPage({
         </section>
 
         {results.accounts.length ? (
-          <ResultsWorkspace campaignId={campaignId} accounts={results.accounts} />
+          <ResultsWorkspace
+            campaignId={campaignId}
+            initialExports={exportsResponse.exports}
+            initialResults={results}
+          />
         ) : (
           <Card className="stack-md">
             <EmptyState

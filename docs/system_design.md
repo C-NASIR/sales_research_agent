@@ -85,3 +85,12 @@ The frontend provides a basic landing page that confirms the project shell is ru
 - Evidence is rendered as compact cards that expose the claim, supporting evidence, confidence, evidence type, and source URL, while timing signals get a matching read model with `why_now` context
 - Scores are shown both as high-level pills and as a raw explanation plus compact JSON breakdown so the user can inspect the scoring rationale without editing it
 - Quality review remains read-only in Phase 8: the UI surfaces quality status, issues, blocked reasons, and recommended edits, but does not yet allow approve, reject, edit, or export actions
+
+## Phase 9 review workflow and export
+
+- Review status is now a supervised user-controlled field on each account, with explicit `approved`, `rejected`, `needs_edit`, `not_enough_evidence`, and `unreviewed` states
+- Draft editing stays local to the app: the user can change the generated outreach subject, body, personalization source, personalization URL, and sales angle, but the system still does not send anything
+- After any draft edit, the backend rewrites the workspace outreach file and reruns `quality_review_tools.py` so the quality panel reflects the edited draft instead of stale generated output
+- Export generation is campaign-scoped and review-gated: only approved accounts are included by default, though the user can opt into other review statuses when generating an export
+- The export subsystem writes three file types under `data/campaigns/{campaign_id}/exports`: `prospects.csv` for spreadsheet use, `campaign_report.md` for human-readable review, and `archive.json` for structured debugging or future import
+- No email sending exists in the MVP because Phase 9 is still a supervised preparation workflow, not an execution workflow

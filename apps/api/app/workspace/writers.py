@@ -49,3 +49,9 @@ def write_outreach_draft(campaign_id: str, account_id: str, data: dict[str, Any]
 
 def write_quality_review(campaign_id: str, account_id: str, data: dict[str, Any]) -> Path:
     return write_json(paths.review_dir(campaign_id) / f"{account_id}.json", data)
+
+
+def write_export_file(path: Path, content: str) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    return path

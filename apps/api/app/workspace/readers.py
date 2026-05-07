@@ -29,6 +29,12 @@ def read_optional_json(path: Path) -> dict[str, Any] | None:
         return json.load(handle)
 
 
+def read_optional_text(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    return path.read_text(encoding="utf-8")
+
+
 def _read_json(path: Path) -> dict[str, Any]:
     if not path.exists():
         raise FileNotFoundError(f"Required workspace file is missing: {path}")

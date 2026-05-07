@@ -8,9 +8,14 @@ import type {
   CampaignRun,
   CampaignRunListResponse,
   CreateCampaignInput,
+  ExportCreateRequest,
+  ExportCreateResponse,
+  ExportListResponse,
   OutreachDraft,
+  OutreachDraftUpdate,
   QualityReview,
   ResearchReport,
+  ReviewStatusResponse,
   ScoreReport,
   SignalReport,
   TodoListResponse,
@@ -176,6 +181,52 @@ export async function getAccountDetail(
     outreach_draft: normalizeOutreachDraft(response.outreach_draft),
     quality_review: normalizeQualityReview(response.quality_review),
   };
+}
+
+export async function updateAccountReviewStatus(
+  campaignId: string,
+  accountId: string,
+  reviewStatus: string,
+): Promise<ReviewStatusResponse> {
+  return apiRequest<ReviewStatusResponse>(
+    `/campaigns/${campaignId}/accounts/${accountId}/review`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ review_status: reviewStatus }),
+    },
+  );
+}
+
+export async function updateOutreachDraft(
+  campaignId: string,
+  accountId: string,
+  input: OutreachDraftUpdate,
+): Promise<OutreachDraft> {
+  const response = await apiRequest<OutreachDraft>(
+    `/campaigns/${campaignId}/accounts/${accountId}/draft`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(input),
+    },
+  );
+
+  return normalizeOutreachDraft(response) as OutreachDraft;
+}
+
+export async function createCampaignExports(
+  campaignId: string,
+  input?: ExportCreateRequest,
+): Promise<ExportCreateResponse> {
+  return apiRequest<ExportCreateResponse>(`/campaigns/${campaignId}/exports`, {
+    method: "POST",
+    body: JSON.stringify(input ?? { include_review_statuses: ["approved"] }),
+  });
+}
+
+export async function listCampaignExports(
+  campaignId: string,
+): Promise<ExportListResponse> {
+  return apiRequest<ExportListResponse>(`/campaigns/${campaignId}/exports`);
 }
 
 function normalizeResearchReport(

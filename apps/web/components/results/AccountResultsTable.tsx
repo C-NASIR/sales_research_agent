@@ -92,6 +92,10 @@ function buildColumns(campaignId: string) {
       header: "Research status",
       cell: (info) => formatStatus(info.getValue()),
     }),
+    columnHelper.accessor("review_status", {
+      header: "Review status",
+      cell: (info) => formatStatus(info.getValue()),
+    }),
     columnHelper.accessor("draft_quality_status", {
       header: "Draft quality",
       cell: (info) => <QualityStatusBadge status={info.getValue()} />,
@@ -184,7 +188,7 @@ export function AccountResultsTable({
             ))
           ) : (
             <tr>
-              <td className="results-empty-cell" colSpan={11}>
+              <td className="results-empty-cell" colSpan={12}>
                 No accounts match the current filters.
               </td>
             </tr>

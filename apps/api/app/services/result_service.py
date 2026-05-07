@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models import Account, OutreachDraft, ResearchReport, ScoreReport, SignalReport
 from app.schemas.account import AccountResponse
-from app.schemas.outreach import QualityReviewResponse
+from app.schemas.outreach import OutreachDraftResponse, QualityReviewResponse
 from app.services import account_service, campaign_service
 from app.tools.export_tools import sort_accounts_by_overall_score
 from app.utils.ids import new_id
@@ -145,13 +145,21 @@ def get_account_detail(db: Session, campaign_id: str, account_id: str) -> dict |
     if account is None:
         return None
 
+    draft = db.scalars(select(OutreachDraft).where(OutreachDraft.account_id == account_id)).first()
     quality_review = readers.read_optional_json(paths.review_dir(campaign_id) / f"{account_id}.json")
+    outreach_draft = readers.read_optional_json(paths.outreach_dir(campaign_id) / f"{account_id}.json")
+    if draft is not None:
+        draft_payload = OutreachDraftResponse.model_validate(draft).model_dump(mode="json")
+        outreach_draft = {
+            **(outreach_draft or {}),
+            **{key: value for key, value in draft_payload.items() if value is not None},
+        }
     detail = {
         "account": AccountResponse.model_validate(account).model_dump(mode="json"),
         "research_report": readers.read_optional_json(paths.research_dir(campaign_id) / f"{account_id}.json"),
         "signal_report": readers.read_optional_json(paths.signals_dir(campaign_id) / f"{account_id}.json"),
         "score_report": readers.read_optional_json(paths.scores_dir(campaign_id) / f"{account_id}.json"),
-        "outreach_draft": readers.read_optional_json(paths.outreach_dir(campaign_id) / f"{account_id}.json"),
+        "outreach_draft": outreach_draft,
         "quality_review": (
             QualityReviewResponse.model_validate(quality_review).model_dump(mode="json")
             if quality_review is not None

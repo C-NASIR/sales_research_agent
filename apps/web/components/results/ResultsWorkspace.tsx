@@ -1,33 +1,57 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { useDeferredValue, useState } from "react";
 
-import type { AccountResult } from "@/lib/types";
+import { getCampaignResults, listCampaignExports } from "@/lib/api";
+import type {
+  CampaignResultsResponse,
+  ExportFile,
+} from "@/lib/types";
 
 import { AccountResultsTable } from "./AccountResultsTable";
 import { ResultsFilters, type ResultsFilterState } from "./ResultsFilters";
 import { ResultsSummaryCards } from "./ResultsSummaryCards";
+import { ExportList } from "../review/ExportList";
+import { ExportPanel } from "../review/ExportPanel";
 
 type ResultsWorkspaceProps = {
   campaignId: string;
-  accounts: AccountResult[];
+  initialResults: CampaignResultsResponse;
+  initialExports: ExportFile[];
 };
 
 const DEFAULT_FILTERS: ResultsFilterState = {
   searchTerm: "",
   researchStatus: "all",
+  reviewStatus: "all",
   draftQualityStatus: "all",
   minOverallScore: "all",
 };
 
 export function ResultsWorkspace({
   campaignId,
-  accounts,
+  initialResults,
+  initialExports,
 }: ResultsWorkspaceProps) {
   const [filters, setFilters] = useState<ResultsFilterState>(DEFAULT_FILTERS);
   const deferredSearchTerm = useDeferredValue(filters.searchTerm);
 
+  const resultsQuery = useQuery({
+    queryKey: ["campaign-results", campaignId],
+    queryFn: () => getCampaignResults(campaignId),
+    initialData: initialResults,
+  });
+  const exportsQuery = useQuery({
+    queryKey: ["campaign-exports", campaignId],
+    queryFn: async () => (await listCampaignExports(campaignId)).exports,
+    initialData: initialExports,
+  });
+
+  const accounts = resultsQuery.data.accounts;
+
   const researchStatuses = [...new Set(accounts.map((account) => account.research_status))];
+  const reviewStatuses = [...new Set(accounts.map((account) => account.review_status))];
   const qualityStatuses = [
     ...new Set(
       accounts
@@ -45,6 +69,9 @@ export function ResultsWorkspace({
     const matchesResearchStatus =
       filters.researchStatus === "all" ||
       account.research_status === filters.researchStatus;
+    const matchesReviewStatus =
+      filters.reviewStatus === "all" ||
+      account.review_status === filters.reviewStatus;
     const matchesDraftQuality =
       filters.draftQualityStatus === "all" ||
       (account.draft_quality_status ?? "missing") === filters.draftQualityStatus;
@@ -58,10 +85,15 @@ export function ResultsWorkspace({
     return (
       matchesSearch &&
       matchesResearchStatus &&
+      matchesReviewStatus &&
       matchesDraftQuality &&
       matchesMinScore
     );
   });
+
+  const approvedAccountCount = accounts.filter(
+    (account) => account.review_status === "approved",
+  ).length;
 
   return (
     <div className="stack-xl">
@@ -69,16 +101,22 @@ export function ResultsWorkspace({
       <ResultsFilters
         filters={filters}
         researchStatuses={researchStatuses}
+        reviewStatuses={reviewStatuses}
         qualityStatuses={qualityStatuses}
         onChange={setFilters}
       />
+      <ExportPanel
+        campaignId={campaignId}
+        approvedAccountCount={approvedAccountCount}
+      />
+      <ExportList exports={exportsQuery.data} />
       <section className="card stack-md">
         <div className="card-row">
           <div>
             <h2>Ranked account results</h2>
             <p className="supporting-text">
               Sorted by overall score by default, with missing scores pushed to the
-              bottom.
+              bottom. Only approved accounts are exported by default.
             </p>
           </div>
           <span className="count-pill">{filteredAccounts.length} visible</span>

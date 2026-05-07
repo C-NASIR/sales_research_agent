@@ -1,6 +1,6 @@
 # Prospecting Agent
 
-Prospecting Agent is a local full-stack sales research workspace that coordinates account research, scoring, outreach drafting, read-only result review, and later export workflows.
+Prospecting Agent is a local full-stack sales research workspace that coordinates account research, scoring, outreach drafting, supervised review, and export workflows.
 
 ## How it works 
 A user can give the system a product, an ideal customer profile, and a list of companies. The system researches those companies, scores them, explains the reasoning, drafts outreach, lets the user review the work, and exports a usable prospecting file.
@@ -24,7 +24,7 @@ The project currently includes the first five backend phases:
 - Root documentation, environment examples, and sample CSV data
 - Local project folders for future campaign workspaces
 
-The project now includes campaign setup, CSV upload, run progress polling, a results dashboard, and account detail pages. Review approvals, draft editing, export workflow, CRM integrations, and production deployment still arrive in later phases.
+The project now includes campaign setup, CSV upload, run progress polling, a results dashboard, account detail pages, supervised review controls, draft editing, and local export generation. CRM integrations, email sending, and production deployment still arrive in later phases.
 
 ## Local setup
 
@@ -77,5 +77,7 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev
 7. Open the run progress page and wait for `completed` or `partial`
 8. Click `View results`
 9. Open one account to inspect evidence, signals, scores, draft, and quality notes
+10. Approve or reject the account, edit the draft, and return to results
+11. Create an export for approved accounts and download the generated files
 
-The browser can now show run progress through polling and read-only results inspection after a run finishes. Review mutations and export arrive in later phases.
+The browser can now show run progress through polling, let the user supervise review decisions, edit drafts locally, and generate export artifacts after a run finishes. The app still does not send outreach or write to a CRM.
