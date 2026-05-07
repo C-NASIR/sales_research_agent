@@ -153,7 +153,9 @@ If the todo file does not exist yet, the endpoint returns:
 
 ### `GET /campaigns/{campaign_id}/results`
 
-Returns ranked account results sorted by `overall_score` descending. No new endpoint was added in Phase 5, but the per-account result rows now expose richer deterministic scoring, persona, and sales-angle output. Low-confidence fallback accounts may still appear with low scores and flagged drafts if research tools failed for that account:
+Phase 8 uses this read-only endpoint to populate the results dashboard.
+
+Returns ranked account results sorted by `overall_score` descending, with missing scores kept at the bottom. Per-account rows expose deterministic scoring, persona, and draft quality output. Low-confidence fallback accounts may still appear with low scores and flagged drafts if research tools failed for that account:
 
 ```json
 {
@@ -181,6 +183,8 @@ Returns ranked account results sorted by `overall_score` descending. No new endp
 
 ### `GET /campaigns/{campaign_id}/accounts/{account_id}`
 
+Phase 8 uses this read-only endpoint to power the account detail page.
+
 Returns the account row plus the run artifacts:
 
 - `account`
@@ -191,6 +195,8 @@ Returns the account row plus the run artifacts:
 - `quality_review`
 
 In Phase 5, `score_report` includes a structured `score_breakdown`, `recommended_persona`, and `sales_angle`. `outreach_draft` includes `personalization_source_url`, and `quality_review` may return `approved_by_reviewer`, `flagged`, or `blocked`.
+
+The frontend renders these sections read-only in Phase 8. No review mutation, draft editing, export creation, or email sending is attached to this response yet.
 
 ### `GET /campaigns/{campaign_id}/events`
 

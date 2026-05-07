@@ -13,14 +13,17 @@ export function RunCompletionActions({ campaignId }: RunCompletionActionsProps) 
         <p className="eyebrow">Run complete</p>
         <h2>Next steps</h2>
       </div>
-      <p className="supporting-text">Results dashboard will be added in Phase 8.</p>
+      <p className="supporting-text">
+        Open the results dashboard to inspect ranked accounts, evidence, scores, and
+        draft quality notes.
+      </p>
       <div className="form-actions">
         <Link className="button button-secondary" href={`/campaigns/${campaignId}`}>
           Back to campaign setup
         </Link>
-        <button className="button button-ghost" disabled type="button">
-          Results dashboard coming later
-        </button>
+        <Link className="button button-ghost" href={`/campaigns/${campaignId}/results`}>
+          View results
+        </Link>
       </div>
     </Card>
   );

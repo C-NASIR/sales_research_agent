@@ -35,6 +35,7 @@ export default async function CampaignDetailPage({
     const showRunProgressLink =
       latestRun !== null ||
       ["running", "completed", "failed", "partial"].includes(campaign.status);
+    const showResultsLink = ["completed", "partial"].includes(campaign.status);
 
     return (
       <main className="page-shell stack-xl">
@@ -68,6 +69,23 @@ export default async function CampaignDetailPage({
               </div>
               <Link className="button button-secondary" href={`/campaigns/${campaign.id}/run`}>
                 View run progress
+              </Link>
+            </div>
+          </Card>
+        ) : null}
+
+        {showResultsLink ? (
+          <Card className="stack-sm">
+            <div className="card-row">
+              <div>
+                <h2>Completed results</h2>
+                <p className="supporting-text">
+                  Review ranked account results, evidence-backed scoring, and draft
+                  quality for this campaign.
+                </p>
+              </div>
+              <Link className="button button-secondary" href={`/campaigns/${campaign.id}/results`}>
+                View results
               </Link>
             </div>
           </Card>
@@ -132,7 +150,8 @@ export default async function CampaignDetailPage({
         <Card className="stack-md">
           <h2>Start research run</h2>
           <p className="supporting-text">
-            Starting the run now opens the progress page. Results views are added later.
+            Starting the run now opens the progress page. Completed or partial runs can
+            be reviewed from the results dashboard.
           </p>
           <StartRunButton
             campaignId={campaign.id}

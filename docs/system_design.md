@@ -76,3 +76,12 @@ The frontend provides a basic landing page that confirms the project shell is ru
 - Polling stops when the run reaches a terminal state; websocket or SSE streaming is intentionally deferred to keep the MVP local and simple
 - Campaign todos are still workspace-backed in `plan/todos.json`, but the API now exposes them so the browser can show plan progress
 - Account progress is inferred from persisted `research_status` values instead of a separate progress subsystem
+
+## Phase 8 results and account detail
+
+- The frontend now adds two read-only result routes: `/campaigns/{campaignId}/results` for ranked campaign output and `/campaigns/{campaignId}/accounts/{accountId}` for one-account inspection
+- The results dashboard fetches `GET /campaigns/{campaign_id}` plus `GET /campaigns/{campaign_id}/results`, then applies client-side search, status filtering, quality filtering, and minimum-score filtering without changing backend contracts
+- The account detail page fetches `GET /campaigns/{campaign_id}` plus `GET /campaigns/{campaign_id}/accounts/{account_id}` and renders missing optional artifacts defensively so incomplete accounts do not crash the page
+- Evidence is rendered as compact cards that expose the claim, supporting evidence, confidence, evidence type, and source URL, while timing signals get a matching read model with `why_now` context
+- Scores are shown both as high-level pills and as a raw explanation plus compact JSON breakdown so the user can inspect the scoring rationale without editing it
+- Quality review remains read-only in Phase 8: the UI surfaces quality status, issues, blocked reasons, and recommended edits, but does not yet allow approve, reject, edit, or export actions

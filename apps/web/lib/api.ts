@@ -1,11 +1,18 @@
 import type {
   ActivityEventListResponse,
+  AccountDetailResponse,
   AccountListResponse,
   Campaign,
   CampaignListResponse,
+  CampaignResultsResponse,
   CampaignRun,
   CampaignRunListResponse,
   CreateCampaignInput,
+  OutreachDraft,
+  QualityReview,
+  ResearchReport,
+  ScoreReport,
+  SignalReport,
   TodoListResponse,
   UploadReportResponse,
 } from "./types";
@@ -138,4 +145,101 @@ export async function getCampaignTodos(
   campaignId: string,
 ): Promise<TodoListResponse> {
   return apiRequest<TodoListResponse>(`/campaigns/${campaignId}/todos`);
+}
+
+export async function getCampaignResults(
+  campaignId: string,
+): Promise<CampaignResultsResponse> {
+  const response = await apiRequest<CampaignResultsResponse>(
+    `/campaigns/${campaignId}/results`,
+  );
+
+  return {
+    ...response,
+    accounts: response.accounts ?? [],
+  };
+}
+
+export async function getAccountDetail(
+  campaignId: string,
+  accountId: string,
+): Promise<AccountDetailResponse> {
+  const response = await apiRequest<AccountDetailResponse>(
+    `/campaigns/${campaignId}/accounts/${accountId}`,
+  );
+
+  return {
+    ...response,
+    research_report: normalizeResearchReport(response.research_report),
+    signal_report: normalizeSignalReport(response.signal_report),
+    score_report: normalizeScoreReport(response.score_report),
+    outreach_draft: normalizeOutreachDraft(response.outreach_draft),
+    quality_review: normalizeQualityReview(response.quality_review),
+  };
+}
+
+function normalizeResearchReport(
+  report: ResearchReport | null,
+): ResearchReport | null {
+  if (!report) {
+    return null;
+  }
+
+  return {
+    ...report,
+    fit_claims: report.fit_claims ?? [],
+    evidence: report.evidence ?? [],
+    risks: report.risks ?? [],
+    sources: report.sources ?? [],
+  };
+}
+
+function normalizeSignalReport(
+  report: SignalReport | null,
+): SignalReport | null {
+  if (!report) {
+    return null;
+  }
+
+  return {
+    ...report,
+    signals: report.signals ?? [],
+    sources: report.sources ?? [],
+  };
+}
+
+function normalizeScoreReport(report: ScoreReport | null): ScoreReport | null {
+  if (!report) {
+    return null;
+  }
+
+  return report;
+}
+
+function normalizeOutreachDraft(
+  draft: OutreachDraft | null,
+): OutreachDraft | null {
+  if (!draft) {
+    return null;
+  }
+
+  return {
+    ...draft,
+    risk_notes: draft.risk_notes ?? [],
+  };
+}
+
+function normalizeQualityReview(
+  review: QualityReview | null,
+): QualityReview | null {
+  if (!review) {
+    return null;
+  }
+
+  return {
+    ...review,
+    issues: review.issues ?? [],
+    blocked_reasons: review.blocked_reasons ?? [],
+    recommended_edits: review.recommended_edits ?? [],
+  };
 }

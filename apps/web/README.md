@@ -1,10 +1,11 @@
 # Prospecting Agent Web
 
-This Next.js app now provides the Phase 6 campaign setup workflow for Prospecting Agent.
+This Next.js app now provides the Phase 8 campaign setup, run visibility, results dashboard, and account detail workflow for Prospecting Agent.
 
 ## Dependencies added in Phase 6
 
 - `@tanstack/react-query`
+- `@tanstack/react-table`
 - `react-hook-form`
 - `zod`
 - `@hookform/resolvers`
@@ -44,9 +45,9 @@ The app starts on `http://localhost:3000` by default.
 
 ## Known limitations
 
-- There is no results dashboard yet.
-- There are no account detail pages yet.
-- Review and export workflows are not in the frontend yet.
+- Review approvals are not in the frontend yet.
+- Draft editing is not in the frontend yet.
+- Export workflows are not in the frontend yet.
 
 ## Phase 7 browser validation
 
@@ -55,3 +56,15 @@ The app starts on `http://localhost:3000` by default.
 3. Confirm the browser navigates to `/campaigns/{campaignId}/run?runId={runId}`
 4. Confirm the run page shows status, account progress, todos, and activity
 5. Wait for polling to stop after `completed`, `failed`, or `partial`
+
+## Phase 8 browser validation
+
+1. Open `http://localhost:3000`
+2. Create a campaign if needed and upload `samples/devtools_companies.csv`
+3. Start a run and wait for `completed` or `partial`
+4. Open `/campaigns/{campaignId}/results`
+5. Confirm rows are sorted by overall score
+6. Use search, research status, quality status, and minimum score filters
+7. Open one account from the results table
+8. Confirm the account detail page shows research, evidence, timing signals, score breakdown, outreach draft, quality review, and risks
+9. Confirm there are no approve, reject, edit, or export controls yet

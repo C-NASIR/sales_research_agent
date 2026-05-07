@@ -1,6 +1,6 @@
 # Prospecting Agent
 
-Prospecting Agent is a local full-stack sales research workspace that coordinates account research, scoring, outreach drafting, review, and later export workflows.
+Prospecting Agent is a local full-stack sales research workspace that coordinates account research, scoring, outreach drafting, read-only result review, and later export workflows.
 
 ## How it works 
 A user can give the system a product, an ideal customer profile, and a list of companies. The system researches those companies, scores them, explains the reasoning, drafts outreach, lets the user review the work, and exports a usable prospecting file.
@@ -24,7 +24,7 @@ The project currently includes the first five backend phases:
 - Root documentation, environment examples, and sample CSV data
 - Local project folders for future campaign workspaces
 
-The project now includes the first frontend campaign setup screens, but it still does not include progress UI, results pages, review approvals, export workflow, CRM integrations, or production deployment.
+The project now includes campaign setup, CSV upload, run progress polling, a results dashboard, and account detail pages. Review approvals, draft editing, export workflow, CRM integrations, and production deployment still arrive in later phases.
 
 ## Local setup
 
@@ -74,5 +74,8 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev
 4. Upload `samples/devtools_companies.csv` on the campaign detail page
 5. Confirm the uploaded accounts appear in the table
 6. Start the research run from the same page
+7. Open the run progress page and wait for `completed` or `partial`
+8. Click `View results`
+9. Open one account to inspect evidence, signals, scores, draft, and quality notes
 
-The browser can now show run progress through polling after run start. Results, review, and export arrive in later phases.
+The browser can now show run progress through polling and read-only results inspection after a run finishes. Review mutations and export arrive in later phases.

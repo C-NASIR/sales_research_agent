@@ -121,3 +121,118 @@ export type TodoItem = {
 export type TodoListResponse = {
   todos: TodoItem[];
 };
+
+export type AccountResult = {
+  account_id: string;
+  company_name: string;
+  domain: string;
+  overall_score: number | null;
+  fit_score: number | null;
+  timing_score: number | null;
+  confidence_score: number | null;
+  persona_score: number | null;
+  recommended_persona: string | null;
+  sales_angle: string | null;
+  review_status: string;
+  research_status: string;
+  draft_quality_status: string | null;
+};
+
+export type CampaignResultsResponse = {
+  campaign_id: string;
+  status: string;
+  accounts: AccountResult[];
+};
+
+export type EvidenceItem = {
+  claim: string;
+  evidence: string;
+  source_url?: string | null;
+  source_title?: string | null;
+  confidence?: string | null;
+  evidence_type?: string | null;
+};
+
+export type RiskItem = {
+  risk: string;
+  reason: string;
+  confidence?: string | null;
+};
+
+export type ResearchReport = {
+  id?: string;
+  account_id?: string;
+  company_summary: string | null;
+  business_model?: string | null;
+  fit_claims: EvidenceItem[];
+  evidence: EvidenceItem[];
+  risks: RiskItem[];
+  confidence: number | null;
+  workspace_file?: string | null;
+  sources?: unknown[];
+};
+
+export type SignalItem = {
+  type: string;
+  description: string;
+  why_it_matters?: string | null;
+  source_url?: string | null;
+  confidence?: string | null;
+};
+
+export type SignalReport = {
+  id?: string;
+  account_id?: string;
+  signals: SignalItem[];
+  timing_score: number | null;
+  why_now: string | null;
+  confidence: number | null;
+  workspace_file?: string | null;
+  sources?: unknown[];
+};
+
+export type ScoreReport = {
+  id?: string;
+  account_id?: string;
+  fit_score: number | null;
+  timing_score: number | null;
+  confidence_score: number | null;
+  persona_score: number | null;
+  overall_score: number | null;
+  recommended_persona?: string | null;
+  sales_angle?: string | null;
+  score_explanation: string | null;
+  score_breakdown: Record<string, unknown> | null;
+  workspace_file?: string | null;
+};
+
+export type OutreachDraft = {
+  id?: string;
+  account_id?: string;
+  subject: string | null;
+  body: string | null;
+  personalization_source: string | null;
+  personalization_source_url?: string | null;
+  sales_angle: string | null;
+  risk_notes: string[];
+  quality_status: string | null;
+  workspace_file?: string | null;
+};
+
+export type QualityReview = {
+  company_name?: string;
+  domain?: string;
+  quality_status: string | null;
+  issues: string[];
+  blocked_reasons: string[];
+  recommended_edits: string[];
+};
+
+export type AccountDetailResponse = {
+  account: Account;
+  research_report: ResearchReport | null;
+  signal_report: SignalReport | null;
+  score_report: ScoreReport | null;
+  outreach_draft: OutreachDraft | null;
+  quality_review: QualityReview | null;
+};
