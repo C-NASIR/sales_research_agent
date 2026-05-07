@@ -88,6 +88,7 @@ class OutreachDraftData(BaseModel):
     subject: str
     body: str
     personalization_source: str
+    personalization_source_url: str | None = None
     sales_angle: str
     risk_notes: list[str]
 

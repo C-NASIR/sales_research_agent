@@ -121,7 +121,7 @@ def _persist_account_outputs(
 ) -> None:
     _persist_account_reports(db, campaign_id, run_id, account, research_report, signal_report)
 
-    score_report = fake_scoring_analyst(normalized_account, research_report, signal_report, icp)
+    score_report = fake_scoring_analyst(normalized_account, brief, research_report, signal_report, icp)
     score_path = writers.write_score_report(campaign_id, account.id, score_report)
     result_service.upsert_score_report(db, account.id, score_report, str(score_path))
     event_service.record_event(
@@ -129,7 +129,38 @@ def _persist_account_outputs(
         campaign_id,
         "score_report_created",
         "Score report created",
-        payload={"account_id": account.id},
+        payload={
+            "account_id": account.id,
+            "company_name": account.company_name,
+            "domain": account.domain,
+            "overall_score": score_report["overall_score"],
+        },
+        run_id=run_id,
+    )
+    event_service.record_event(
+        db,
+        campaign_id,
+        "persona_recommended",
+        "Recommended persona selected",
+        payload={
+            "account_id": account.id,
+            "company_name": account.company_name,
+            "domain": account.domain,
+            "overall_score": score_report["overall_score"],
+        },
+        run_id=run_id,
+    )
+    event_service.record_event(
+        db,
+        campaign_id,
+        "sales_angle_created",
+        "Sales angle created",
+        payload={
+            "account_id": account.id,
+            "company_name": account.company_name,
+            "domain": account.domain,
+            "overall_score": score_report["overall_score"],
+        },
         run_id=run_id,
     )
 
@@ -141,7 +172,12 @@ def _persist_account_outputs(
         campaign_id,
         "draft_created",
         "Outreach draft created",
-        payload={"account_id": account.id},
+        payload={
+            "account_id": account.id,
+            "company_name": account.company_name,
+            "domain": account.domain,
+            "overall_score": score_report["overall_score"],
+        },
         run_id=run_id,
     )
 
@@ -153,9 +189,45 @@ def _persist_account_outputs(
         campaign_id,
         "quality_review_created",
         "Quality review created",
-        payload={"account_id": account.id, "quality_status": quality_review["quality_status"]},
+        payload={
+            "account_id": account.id,
+            "company_name": account.company_name,
+            "domain": account.domain,
+            "overall_score": score_report["overall_score"],
+            "quality_status": quality_review["quality_status"],
+        },
         run_id=run_id,
     )
+    if quality_review["quality_status"] == "flagged":
+        event_service.record_event(
+            db,
+            campaign_id,
+            "draft_flagged",
+            "Outreach draft was flagged during review",
+            payload={
+                "account_id": account.id,
+                "company_name": account.company_name,
+                "domain": account.domain,
+                "overall_score": score_report["overall_score"],
+                "quality_status": quality_review["quality_status"],
+            },
+            run_id=run_id,
+        )
+    if quality_review["quality_status"] == "blocked":
+        event_service.record_event(
+            db,
+            campaign_id,
+            "draft_blocked",
+            "Outreach draft was blocked during review",
+            payload={
+                "account_id": account.id,
+                "company_name": account.company_name,
+                "domain": account.domain,
+                "overall_score": score_report["overall_score"],
+                "quality_status": quality_review["quality_status"],
+            },
+            run_id=run_id,
+        )
 
 
 def run_campaign_workflow(db: Session, campaign_id: str, run_id: str) -> None:

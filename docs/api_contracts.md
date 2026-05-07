@@ -114,7 +114,7 @@ Returns the persisted run record:
 
 ### `GET /campaigns/{campaign_id}/results`
 
-Returns ranked account results sorted by `overall_score` descending. In Phase 4, low-confidence fallback accounts may still appear with low scores and flagged drafts if research tools failed for that account:
+Returns ranked account results sorted by `overall_score` descending. No new endpoint was added in Phase 5, but the per-account result rows now expose richer deterministic scoring, persona, and sales-angle output. Low-confidence fallback accounts may still appear with low scores and flagged drafts if research tools failed for that account:
 
 ```json
 {
@@ -151,7 +151,7 @@ Returns the account row plus the run artifacts:
 - `outreach_draft`
 - `quality_review`
 
-In Phase 4, `research_report` and `signal_report` include a `sources` array, and research evidence items preserve `source_url`.
+In Phase 5, `score_report` includes a structured `score_breakdown`, `recommended_persona`, and `sales_angle`. `outreach_draft` includes `personalization_source_url`, and `quality_review` may return `approved_by_reviewer`, `flagged`, or `blocked`.
 
 ### `GET /campaigns/{campaign_id}/events`
 
@@ -166,6 +166,16 @@ Phase 4 extends activity events with real-research steps, including:
 - `signal_synthesis_completed`
 - `research_low_confidence`
 - `research_tool_failed`
+
+Phase 5 adds or updates downstream workflow events, including:
+
+- `score_report_created`
+- `persona_recommended`
+- `sales_angle_created`
+- `draft_created`
+- `quality_review_created`
+- `draft_flagged`
+- `draft_blocked`
 
 ## Planned, not implemented yet
 

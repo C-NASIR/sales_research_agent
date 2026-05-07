@@ -16,6 +16,7 @@ class OutreachDraftResponse(BaseModel):
     subject: str | None
     body: str | None
     personalization_source: str | None
+    personalization_source_url: str | None = None
     sales_angle: str | None
     risk_notes: list[Any] | None
     quality_status: str | None = None

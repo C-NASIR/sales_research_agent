@@ -80,6 +80,7 @@ def upsert_outreach_draft(db: Session, account_id: str, data: dict, workspace_fi
     draft.subject = data["subject"]
     draft.body = data["body"]
     draft.personalization_source = data["personalization_source"]
+    draft.personalization_source_url = data.get("personalization_source_url")
     draft.sales_angle = data["sales_angle"]
     draft.risk_notes = data["risk_notes"]
     draft.workspace_file = workspace_file

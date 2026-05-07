@@ -208,6 +208,7 @@ class OutreachDraft(Base):
     subject: Mapped[str | None] = mapped_column(String(255), nullable=True)
     body: Mapped[str | None] = mapped_column(Text, nullable=True)
     personalization_source: Mapped[str | None] = mapped_column(Text, nullable=True)
+    personalization_source_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     sales_angle: Mapped[str | None] = mapped_column(Text, nullable=True)
     risk_notes: Mapped[list[Any] | None] = mapped_column(JSON, nullable=True)
     quality_status: Mapped[str | None] = mapped_column(String(50), nullable=True)

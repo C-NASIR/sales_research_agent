@@ -112,6 +112,7 @@ Phase 4 preserves source URLs inside signal items stored in the `signals` JSON f
 - `subject`
 - `body`
 - `personalization_source`
+- `personalization_source_url`
 - `sales_angle`
 - `risk_notes`
 - `quality_status`
@@ -147,4 +148,4 @@ Phase 3 and Phase 4 write run artifacts under:
 - `data/campaigns/{campaign_id}/outreach/{account_id}.json`
 - `data/campaigns/{campaign_id}/review/{account_id}.json`
 
-No migration framework exists yet. If an older local SQLite database does not match the current SQLAlchemy models during MVP development, the expected recovery path is to delete the local database and rerun the app.
+No migration framework exists yet. If an older local SQLite database does not match the current SQLAlchemy models during MVP development, the expected recovery path is to delete the local database and rerun the app. Phase 5 adds `personalization_source_url` to `OutreachDraft`, so older local SQLite files should be recreated.

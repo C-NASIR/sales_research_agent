@@ -31,6 +31,8 @@ Other useful Phase 4 environment variables:
 - `MAX_SCRAPED_PAGES_PER_ACCOUNT`
 - `MAX_SOURCE_CHARS`
 
+During MVP development, delete `data/prospecting_agent.db` and restart the API if your local SQLite file was created before the latest schema changes. Phase 5 adds `personalization_source_url` to the outreach draft table.
+
 ## Health check
 
 ```bash
@@ -89,6 +91,42 @@ curl -X POST http://localhost:8000/campaigns/campaign_REPLACE_ME/runs
 ```
 
 With `RESEARCH_MODE=real`, a misconfigured backend returns a clear run failure instead of crashing at import time.
+
+## Phase 5 validation flow
+
+Start in fake mode with a fresh SQLite file if you want to validate the deterministic workflow:
+
+```bash
+RESEARCH_MODE=fake DATABASE_URL=sqlite:///./data/phase5_validation.db uvicorn app.main:app --reload
+```
+
+Then run:
+
+```bash
+curl -X POST http://localhost:8000/campaigns \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "AI code review outbound",
+    "product_description": "AI code review tool for engineering teams",
+    "ideal_customer_profile": "B2B SaaS companies and developer tool companies with active engineering teams",
+    "pain_statement": "Slow pull request review and inconsistent code quality",
+    "target_persona": "VP Engineering, CTO, Head of Platform",
+    "tone": "Direct, specific, no hype",
+    "max_accounts": 10
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8000/campaigns/campaign_REPLACE_ME/upload \
+  -F "file=@../../samples/devtools_companies.csv"
+```
+
+```bash
+curl -X POST http://localhost:8000/campaigns/campaign_REPLACE_ME/runs
+curl http://localhost:8000/campaigns/campaign_REPLACE_ME/results
+curl http://localhost:8000/campaigns/campaign_REPLACE_ME/events
+curl http://localhost:8000/campaigns/campaign_REPLACE_ME/accounts/account_REPLACE_ME
+```
 
 ## Get results
 

@@ -29,6 +29,15 @@ The frontend provides a basic landing page that confirms the project shell is ru
 - Real mode also writes `research/sources/{account_id}.json` for debugging source collection without bloating the primary report files
 - Optional Deep Agents wiring still exists, but the default local workflow remains deterministic
 
+## Phase 5 scoring and outreach pipeline
+
+- The coordinator keeps the same run surface but now delegates scoring, persona recommendation, sales angle generation, outreach drafting, and quality review to shared deterministic tool modules
+- `scoring_tools.py` turns research evidence plus timing signals into explainable fit, timing, confidence, persona, and overall scores
+- `persona_tools.py` chooses the best target persona based on the campaign brief and evidence-backed company context
+- `outreach_tools.py` generates a short sales angle, selects one personalization anchor when available, and drafts a cautious outreach email
+- `quality_review_tools.py` checks for fake familiarity, deceptive subject lines, unsupported claims, weak evidence, and missing personalization
+- Research evidence stays separate from inference: the score and outreach steps can reason from evidence-backed fields, but they do not invent unsupported company pain
+
 ## Subagent responsibilities
 
 - ICP strategist: campaign rubric and target criteria
@@ -36,7 +45,7 @@ The frontend provides a basic landing page that confirms the project shell is ru
 - Signal detector: fake timing signals or real source-backed timing signals depending on configuration
 - Scoring analyst: deterministic weighted scores based on fit claims, signal timing, evidence count, and persona alignment
 - Outreach writer: short draft anchored to research evidence when available
-- Compliance reviewer: checks personalization, unsupported familiarity, missing sources, and weak evidence
+- Compliance reviewer: checks personalization, unsupported familiarity, missing sources, deceptive framing, and weak evidence
 
 ## Persistence
 

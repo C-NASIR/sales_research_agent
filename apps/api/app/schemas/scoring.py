@@ -13,11 +13,11 @@ class ScoreReportResponse(BaseModel):
     account_id: str | None = None
     company_name: str | None = None
     domain: str | None = None
-    fit_score: float | None
-    timing_score: float | None
-    confidence_score: float | None
-    persona_score: float | None
-    overall_score: float | None
+    fit_score: int | None
+    timing_score: int | None
+    confidence_score: int | None
+    persona_score: int | None
+    overall_score: int | None
     score_explanation: str | None
     score_breakdown: dict[str, Any] | None
     recommended_persona: str | None = None

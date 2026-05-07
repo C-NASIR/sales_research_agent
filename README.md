@@ -8,7 +8,7 @@ The MVP is intended to let a user create a campaign, upload target companies, ru
 
 ## Current scope
 
-The project currently includes the first four backend phases:
+The project currently includes the first five backend phases:
 
 - Minimal FastAPI backend with a root endpoint and `GET /health`
 - SQLite-backed backend foundation for campaigns, accounts, events, and future report entities
@@ -16,6 +16,7 @@ The project currently includes the first four backend phases:
 - CSV upload, domain normalization, account creation, and campaign workspace files under `data/campaigns`
 - Phase 3 deterministic workflow runs with simulated research, scoring, outreach, and results APIs
 - Phase 4 real public web research mode with Tavily search, Firecrawl scraping, deterministic evidence synthesis, and a configurable fake-mode fallback
+- Phase 5 deterministic scoring, persona recommendation, sales-angle generation, outreach drafting, and quality review on the existing API surfaces
 - Minimal Next.js frontend with a landing page
 - Root documentation, environment examples, and sample CSV data
 - Local project folders for future campaign workspaces

@@ -45,6 +45,9 @@ app/services/workspace_service.py
 app/tools/__init__.py
 app/tools/export_tools.py
 app/tools/fake_research_tools.py
+app/tools/outreach_tools.py
+app/tools/persona_tools.py
+app/tools/quality_review_tools.py
 app/tools/research_synthesis.py
 app/tools/scoring_tools.py
 app/tools/source_extraction.py
