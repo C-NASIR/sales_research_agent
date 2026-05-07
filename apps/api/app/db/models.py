@@ -136,6 +136,7 @@ class ResearchReport(Base):
     id: Mapped[str] = mapped_column(String, primary_key=True)
     account_id: Mapped[str] = mapped_column(ForeignKey("accounts.id", ondelete="CASCADE"), unique=True, index=True)
     company_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    business_model: Mapped[str | None] = mapped_column(String(255), nullable=True)
     fit_claims: Mapped[list[Any] | None] = mapped_column(JSON, nullable=True)
     evidence: Mapped[list[Any] | None] = mapped_column(JSON, nullable=True)
     risks: Mapped[list[Any] | None] = mapped_column(JSON, nullable=True)
@@ -185,6 +186,8 @@ class ScoreReport(Base):
     overall_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     score_explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
     score_breakdown: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    recommended_persona: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    sales_angle: Mapped[str | None] = mapped_column(Text, nullable=True)
     workspace_file: Mapped[str | None] = mapped_column(String(512), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(

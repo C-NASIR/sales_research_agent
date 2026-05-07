@@ -1,6 +1,6 @@
 # Prospecting Agent API
 
-This FastAPI service provides the Phase 2 backend foundation for Prospecting Agent.
+This FastAPI service provides the Phase 3 backend foundation for Prospecting Agent.
 
 ## Install
 
@@ -69,13 +69,40 @@ Replace the campaign id after creating one:
 curl http://localhost:8000/campaigns/campaign_REPLACE_ME/events
 ```
 
+## Start run
+
+```bash
+curl -X POST http://localhost:8000/campaigns/campaign_REPLACE_ME/runs
+```
+
+## Get results
+
+```bash
+curl http://localhost:8000/campaigns/campaign_REPLACE_ME/results
+```
+
+## Get account detail
+
+Replace the account id:
+
+```bash
+curl http://localhost:8000/campaigns/campaign_REPLACE_ME/accounts/account_REPLACE_ME
+```
+
 ## Inspect workspace files
 
-The upload flow writes files under:
+The upload and run flows write files under:
 
 ```text
 data/campaigns/campaign_REPLACE_ME/input/brief.json
 data/campaigns/campaign_REPLACE_ME/input/uploaded_companies.csv
 data/campaigns/campaign_REPLACE_ME/input/normalized_accounts.json
 data/campaigns/campaign_REPLACE_ME/input/upload_report.json
+data/campaigns/campaign_REPLACE_ME/plan/todos.json
+data/campaigns/campaign_REPLACE_ME/plan/icp.json
+data/campaigns/campaign_REPLACE_ME/research/account_REPLACE_ME.json
+data/campaigns/campaign_REPLACE_ME/signals/account_REPLACE_ME.json
+data/campaigns/campaign_REPLACE_ME/scores/account_REPLACE_ME.json
+data/campaigns/campaign_REPLACE_ME/outreach/account_REPLACE_ME.json
+data/campaigns/campaign_REPLACE_ME/review/account_REPLACE_ME.json
 ```

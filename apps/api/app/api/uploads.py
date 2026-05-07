@@ -77,9 +77,19 @@ async def upload_campaign_accounts(
 
     workspace_service.ensure_campaign_workspace(campaign)
     workspace_service.write_uploaded_csv(campaign, file_bytes)
-    workspace_service.write_normalized_accounts(campaign, accounts_to_create)
 
     created_accounts = account_service.create_accounts_for_campaign(db, campaign_id, accounts_to_create)
+    persisted_accounts = account_service.list_accounts_for_campaign(db, campaign_id)
+    workspace_service.write_normalized_accounts(
+        campaign,
+        [
+            {
+                "company_name": account.company_name,
+                "domain": account.domain,
+            }
+            for account in persisted_accounts
+        ],
+    )
 
     event_service.record_event(
         db,

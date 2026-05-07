@@ -29,12 +29,20 @@ def _resolve_database_url(raw_value: str, data_dir: Path) -> str:
     return raw_value
 
 
+def _parse_bool(raw_value: str | None) -> bool:
+    if raw_value is None:
+        return False
+    return raw_value.strip().lower() in {"true", "1", "yes", "on"}
+
+
 @dataclass(frozen=True)
 class Settings:
     app_name: str
     environment: str
     data_dir: Path
     database_url: str
+    model_name: str
+    use_deep_agents: bool
 
 
 data_dir = _resolve_data_dir(os.getenv("DATA_DIR", "./data"))
@@ -47,4 +55,6 @@ settings = Settings(
         os.getenv("DATABASE_URL", "sqlite:///./data/prospecting_agent.db"),
         data_dir,
     ),
+    model_name=os.getenv("MODEL_NAME", "openai:gpt-4.1-mini"),
+    use_deep_agents=_parse_bool(os.getenv("USE_DEEP_AGENTS", "false")),
 )

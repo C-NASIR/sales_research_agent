@@ -9,6 +9,8 @@ from app.api.accounts import router as accounts_router
 from app.api.campaigns import router as campaigns_router
 from app.api.events import router as events_router
 from app.api.health import router as health_router
+from app.api.results import router as results_router
+from app.api.runs import router as runs_router
 from app.api.uploads import router as uploads_router
 from app.config import settings
 from app.db.init_db import init_db
@@ -33,6 +35,8 @@ app.include_router(campaigns_router)
 app.include_router(accounts_router)
 app.include_router(events_router)
 app.include_router(uploads_router)
+app.include_router(runs_router)
+app.include_router(results_router)
 
 
 @app.get("/")

@@ -17,3 +17,7 @@ class CampaignRunResponse(BaseModel):
     agent_thread_id: str | None
     created_at: datetime
     updated_at: datetime
+
+
+class CampaignRunCreateResponse(CampaignRunResponse):
+    pass

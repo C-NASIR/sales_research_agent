@@ -27,6 +27,14 @@ def get_account(db: Session, campaign_id: str, account_id: str) -> Account | Non
     return db.scalars(statement).first()
 
 
+def get_account_by_domain(db: Session, campaign_id: str, domain: str) -> Account | None:
+    statement = select(Account).where(
+        Account.campaign_id == campaign_id,
+        Account.domain == domain,
+    )
+    return db.scalars(statement).first()
+
+
 def get_existing_domains_for_campaign(db: Session, campaign_id: str) -> set[str]:
     statement = select(Account.domain).where(Account.campaign_id == campaign_id)
     return set(db.scalars(statement).all())
@@ -63,3 +71,11 @@ def create_accounts_for_campaign(
     for account in created_accounts:
         db.refresh(account)
     return created_accounts
+
+
+def update_account_research_status(db: Session, account: Account, status: str) -> Account:
+    account.research_status = status
+    account.updated_at = utc_now()
+    db.commit()
+    db.refresh(account)
+    return account

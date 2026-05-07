@@ -1,6 +1,6 @@
 # Data model
 
-The project now has a Phase 2 SQLite-backed data model plus a campaign workspace on disk. The schema is intentionally simple and is designed to support later research, scoring, review, and export phases.
+The project now has a Phase 3 SQLite-backed data model plus a campaign workspace on disk. The schema is intentionally simple and is designed to support later real research, scoring, review, and export phases.
 
 ## Campaign
 
@@ -46,6 +46,8 @@ Phase 2 creates `Account` rows from uploaded CSV files after domain normalizatio
 - `created_at`
 - `updated_at`
 
+Phase 3 creates a `CampaignRun` row for every run request and updates it to `running`, `completed`, `partial`, or `failed`.
+
 ## ActivityEvent
 
 - `id`
@@ -61,6 +63,7 @@ Phase 2 creates `Account` rows from uploaded CSV files after domain normalizatio
 - `id`
 - `account_id`
 - `company_summary`
+- `business_model`
 - `fit_claims`
 - `evidence`
 - `risks`
@@ -92,6 +95,8 @@ Phase 2 creates `Account` rows from uploaded CSV files after domain normalizatio
 - `overall_score`
 - `score_explanation`
 - `score_breakdown`
+- `recommended_persona`
+- `sales_angle`
 - `workspace_file`
 - `created_at`
 - `updated_at`
@@ -126,3 +131,13 @@ Phase 2 also writes campaign input artifacts under:
 - `data/campaigns/{campaign_id}/input/uploaded_companies.csv`
 - `data/campaigns/{campaign_id}/input/normalized_accounts.json`
 - `data/campaigns/{campaign_id}/input/upload_report.json`
+
+Phase 3 writes run artifacts under:
+
+- `data/campaigns/{campaign_id}/plan/todos.json`
+- `data/campaigns/{campaign_id}/plan/icp.json`
+- `data/campaigns/{campaign_id}/research/{account_id}.json`
+- `data/campaigns/{campaign_id}/signals/{account_id}.json`
+- `data/campaigns/{campaign_id}/scores/{account_id}.json`
+- `data/campaigns/{campaign_id}/outreach/{account_id}.json`
+- `data/campaigns/{campaign_id}/review/{account_id}.json`

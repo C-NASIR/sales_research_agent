@@ -1,6 +1,6 @@
 # API contracts
 
-## Implemented in Phase 2
+## Implemented in Phase 3
 
 ### `GET /health`
 
@@ -86,9 +86,68 @@ The upload endpoint writes:
 - `data/campaigns/{campaign_id}/input/normalized_accounts.json`
 - `data/campaigns/{campaign_id}/input/upload_report.json`
 
+### `POST /campaigns/{campaign_id}/runs`
+
+Starts a synchronous Phase 3 deterministic fake workflow run. The default path does not require API keys and does not call real web research tools.
+
+### `GET /campaigns/{campaign_id}/runs/{run_id}`
+
+Returns the persisted run record:
+
+```json
+{
+  "id": "run_...",
+  "campaign_id": "campaign_...",
+  "status": "completed",
+  "started_at": "2026-05-07T01:10:16.529359",
+  "completed_at": "2026-05-07T01:10:16.612419",
+  "error_message": null,
+  "agent_thread_id": "run_...",
+  "created_at": "2026-05-07T01:10:16.525376",
+  "updated_at": "2026-05-07T01:10:16.612419"
+}
+```
+
+### `GET /campaigns/{campaign_id}/results`
+
+Returns ranked account results sorted by `overall_score` descending:
+
+```json
+{
+  "campaign_id": "campaign_...",
+  "status": "completed",
+  "accounts": [
+    {
+      "account_id": "account_...",
+      "company_name": "Sentry",
+      "domain": "sentry.io",
+      "overall_score": 78,
+      "fit_score": 82,
+      "timing_score": 68,
+      "confidence_score": 79,
+      "persona_score": 80,
+      "recommended_persona": "VP Engineering",
+      "sales_angle": "Engineering workflow quality",
+      "review_status": "unreviewed",
+      "research_status": "completed",
+      "draft_quality_status": "approved_by_reviewer"
+    }
+  ]
+}
+```
+
+### `GET /campaigns/{campaign_id}/accounts/{account_id}`
+
+Returns the account row plus the Phase 3 simulated sections:
+
+- `account`
+- `research_report`
+- `signal_report`
+- `score_report`
+- `outreach_draft`
+- `quality_review`
+
 ## Planned, not implemented yet
 
-- `POST /campaigns/{campaign_id}/runs`
-- `GET /campaigns/{campaign_id}/results`
 - `PATCH /campaigns/{campaign_id}/accounts/{account_id}/review`
 - `POST /campaigns/{campaign_id}/exports`
