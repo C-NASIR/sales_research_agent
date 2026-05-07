@@ -1,6 +1,6 @@
 # Data model
 
-Phase 1 introduces the initial SQLite-backed data model for the backend foundation. The schema is intentionally simple and is designed to support later CSV import, research, scoring, review, and export phases.
+The project now has a Phase 2 SQLite-backed data model plus a campaign workspace on disk. The schema is intentionally simple and is designed to support later research, scoring, review, and export phases.
 
 ## Campaign
 
@@ -31,6 +31,8 @@ Related entities: accounts, runs, events, exports.
 - `updated_at`
 
 Related entities: campaign, research_report, signal_report, score_report, outreach_draft.
+
+Phase 2 creates `Account` rows from uploaded CSV files after domain normalization and duplicate filtering.
 
 ## CampaignRun
 
@@ -115,3 +117,12 @@ Related entities: campaign, research_report, signal_report, score_report, outrea
 - `export_type`
 - `file_path`
 - `created_at`
+
+## Workspace files
+
+Phase 2 also writes campaign input artifacts under:
+
+- `data/campaigns/{campaign_id}/input/brief.json`
+- `data/campaigns/{campaign_id}/input/uploaded_companies.csv`
+- `data/campaigns/{campaign_id}/input/normalized_accounts.json`
+- `data/campaigns/{campaign_id}/input/upload_report.json`

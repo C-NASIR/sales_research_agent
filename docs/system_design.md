@@ -13,10 +13,11 @@ The frontend provides a basic landing page that confirms the project shell is ru
 
 - Root and health endpoints for local verification
 - A SQLite-backed state layer for campaigns, accounts, runs, events, exports, and future report entities
-- Phase 1 campaign APIs for creating and reading campaigns plus listing campaign accounts and events
+- Campaign APIs for creating and reading campaigns plus listing campaign accounts and events
+- Phase 2 campaign workspace creation under `data/campaigns/{campaign_id}`
+- CSV input processing that normalizes company rows, detects duplicates, creates account records, and writes input artifacts to disk
 
 ## Planned expansion
 
 - A future Deep Agents coordinator will manage multi-step research and enrichment workflows.
-- Future campaign workspaces will live under `data/campaigns`.
-- Later phases will add CSV upload, research orchestration, scoring, review, and export workflows on top of the Phase 1 backend foundation.
+- Later phases will add research orchestration, scoring, review, and export workflows on top of the Phase 2 input foundation.

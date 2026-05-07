@@ -1,6 +1,6 @@
 # Prospecting Agent API
 
-This FastAPI service provides the Phase 1 backend foundation for Prospecting Agent.
+This FastAPI service provides the Phase 2 backend foundation for Prospecting Agent.
 
 ## Install
 
@@ -46,10 +46,36 @@ curl -X POST http://localhost:8000/campaigns \
 curl http://localhost:8000/campaigns
 ```
 
+## Upload sample CSV
+
+Replace the campaign id after creating one:
+
+```bash
+curl -X POST http://localhost:8000/campaigns/campaign_REPLACE_ME/upload \
+  -F "file=@../../samples/devtools_companies.csv"
+```
+
+## List accounts
+
+```bash
+curl http://localhost:8000/campaigns/campaign_REPLACE_ME/accounts
+```
+
 ## List events
 
 Replace the campaign id after creating one:
 
 ```bash
 curl http://localhost:8000/campaigns/campaign_REPLACE_ME/events
+```
+
+## Inspect workspace files
+
+The upload flow writes files under:
+
+```text
+data/campaigns/campaign_REPLACE_ME/input/brief.json
+data/campaigns/campaign_REPLACE_ME/input/uploaded_companies.csv
+data/campaigns/campaign_REPLACE_ME/input/normalized_accounts.json
+data/campaigns/campaign_REPLACE_ME/input/upload_report.json
 ```

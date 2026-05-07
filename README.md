@@ -13,6 +13,7 @@ The project currently includes Phase 0 and Phase 1:
 - Minimal FastAPI backend with a root endpoint and `GET /health`
 - SQLite-backed backend foundation for campaigns, accounts, events, and future report entities
 - Campaign APIs for create, list, get, and campaign-scoped accounts and events
+- CSV upload, domain normalization, account creation, and campaign workspace files under `data/campaigns`
 - Minimal Next.js frontend with a landing page
 - Root documentation, environment examples, and sample CSV data
 - Local project folders for future campaign workspaces

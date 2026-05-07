@@ -17,6 +17,13 @@ def create_campaign(payload: CampaignCreate, db: Session = Depends(get_db)) -> C
         type="campaign_created",
         message="Campaign created",
     )
+    event_service.record_event(
+        db,
+        campaign_id=campaign.id,
+        type="campaign_workspace_created",
+        message="Campaign workspace created",
+        payload={"workspace_path": campaign.workspace_path},
+    )
     return CampaignResponse.model_validate(campaign)
 
 

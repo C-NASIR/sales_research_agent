@@ -6,12 +6,14 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.db.models import Campaign
 from app.schemas.campaign import CampaignCreate
+from app.services import workspace_service
 from app.utils.ids import new_id
 from app.utils.timestamps import utc_now
 
 
 def create_campaign(db: Session, data: CampaignCreate) -> Campaign:
     campaign_id = new_id("campaign")
+    created_at = utc_now()
     campaign = Campaign(
         id=campaign_id,
         name=data.name,
@@ -23,12 +25,14 @@ def create_campaign(db: Session, data: CampaignCreate) -> Campaign:
         max_accounts=data.max_accounts,
         status="draft",
         workspace_path=str(settings.data_dir / "campaigns" / campaign_id),
-        created_at=utc_now(),
-        updated_at=utc_now(),
+        created_at=created_at,
+        updated_at=created_at,
     )
     db.add(campaign)
     db.commit()
     db.refresh(campaign)
+    workspace_service.ensure_campaign_workspace(campaign)
+    workspace_service.write_campaign_brief(campaign)
     return campaign
 
 
@@ -50,4 +54,5 @@ def update_campaign_status(db: Session, campaign_id: str, status: str) -> Campai
     campaign.updated_at = utc_now()
     db.commit()
     db.refresh(campaign)
+    workspace_service.write_campaign_brief(campaign)
     return campaign
