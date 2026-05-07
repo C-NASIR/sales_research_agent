@@ -79,3 +79,12 @@ def update_account_research_status(db: Session, account: Account, status: str) -
     db.commit()
     db.refresh(account)
     return account
+
+
+def update_all_account_research_statuses(db: Session, campaign_id: str, status: str) -> None:
+    accounts = list_accounts_for_campaign(db, campaign_id)
+    now = utc_now()
+    for account in accounts:
+        account.research_status = status
+        account.updated_at = now
+    db.commit()

@@ -1,9 +1,12 @@
 import type {
+  ActivityEventListResponse,
   AccountListResponse,
   Campaign,
   CampaignListResponse,
   CampaignRun,
+  CampaignRunListResponse,
   CreateCampaignInput,
+  TodoListResponse,
   UploadReportResponse,
 } from "./types";
 
@@ -104,4 +107,35 @@ export async function startCampaignRun(
   return apiRequest<CampaignRun>(`/campaigns/${campaignId}/runs`, {
     method: "POST",
   });
+}
+
+export async function getCampaignRun(
+  campaignId: string,
+  runId: string,
+): Promise<CampaignRun> {
+  return apiRequest<CampaignRun>(`/campaigns/${campaignId}/runs/${runId}`);
+}
+
+export async function listCampaignRuns(
+  campaignId: string,
+): Promise<CampaignRunListResponse> {
+  return apiRequest<CampaignRunListResponse>(`/campaigns/${campaignId}/runs`);
+}
+
+export async function getLatestCampaignRun(
+  campaignId: string,
+): Promise<CampaignRun> {
+  return apiRequest<CampaignRun>(`/campaigns/${campaignId}/runs/latest`);
+}
+
+export async function listCampaignEvents(
+  campaignId: string,
+): Promise<ActivityEventListResponse> {
+  return apiRequest<ActivityEventListResponse>(`/campaigns/${campaignId}/events`);
+}
+
+export async function getCampaignTodos(
+  campaignId: string,
+): Promise<TodoListResponse> {
+  return apiRequest<TodoListResponse>(`/campaigns/${campaignId}/todos`);
 }

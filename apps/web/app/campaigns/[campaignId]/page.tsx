@@ -7,7 +7,7 @@ import { StartRunButton } from "@/components/campaign/StartRunButton";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorMessage } from "@/components/ui/ErrorMessage";
-import { getCampaign, listCampaignAccounts, ApiError } from "@/lib/api";
+import { ApiError, getCampaign, getLatestCampaignRun, listCampaignAccounts } from "@/lib/api";
 
 type CampaignDetailPageProps = {
   params: Promise<{
@@ -21,11 +21,20 @@ export default async function CampaignDetailPage({
   const { campaignId } = await params;
 
   try {
-    const [campaign, accountResponse] = await Promise.all([
+    const [campaign, accountResponse, latestRun] = await Promise.all([
       getCampaign(campaignId),
       listCampaignAccounts(campaignId),
+      getLatestCampaignRun(campaignId).catch((error) => {
+        if (error instanceof ApiError && error.status === 404) {
+          return null;
+        }
+        throw error;
+      }),
     ]);
     const accountCount = accountResponse.accounts.length;
+    const showRunProgressLink =
+      latestRun !== null ||
+      ["running", "completed", "failed", "partial"].includes(campaign.status);
 
     return (
       <main className="page-shell stack-xl">
@@ -47,6 +56,22 @@ export default async function CampaignDetailPage({
             Back to campaigns
           </Link>
         </section>
+
+        {showRunProgressLink ? (
+          <Card className="stack-sm">
+            <div className="card-row">
+              <div>
+                <h2>Latest run</h2>
+                <p className="supporting-text">
+                  View the polling-based progress page for the most recent campaign run.
+                </p>
+              </div>
+              <Link className="button button-secondary" href={`/campaigns/${campaign.id}/run`}>
+                View run progress
+              </Link>
+            </div>
+          </Card>
+        ) : null}
 
         <Card className="stack-md">
           <h2>Campaign brief</h2>
@@ -107,7 +132,7 @@ export default async function CampaignDetailPage({
         <Card className="stack-md">
           <h2>Start research run</h2>
           <p className="supporting-text">
-            This phase starts the run only. Progress and results views are added later.
+            Starting the run now opens the progress page. Results views are added later.
           </p>
           <StartRunButton
             campaignId={campaign.id}

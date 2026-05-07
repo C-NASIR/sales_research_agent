@@ -25,8 +25,11 @@ export function StartRunButton({
 
   const mutation = useMutation({
     mutationFn: () => startCampaignRun(campaignId),
-    onSuccess: () => {
-      router.refresh();
+    onSuccess: (run) => {
+      const path = run.id
+        ? `/campaigns/${campaignId}/run?runId=${encodeURIComponent(run.id)}`
+        : `/campaigns/${campaignId}/run`;
+      router.push(path);
     },
   });
 
@@ -53,12 +56,6 @@ export function StartRunButton({
         />
       ) : null}
 
-      {mutation.isSuccess ? (
-        <p className="success-message">
-          Run started or completed. Progress and results pages will be added in later
-          phases.
-        </p>
-      ) : null}
     </div>
   );
 }

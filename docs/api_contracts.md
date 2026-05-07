@@ -88,11 +88,26 @@ The upload endpoint writes:
 
 ### `POST /campaigns/{campaign_id}/runs`
 
-Starts a synchronous campaign workflow run.
+Starts a background campaign workflow run and returns immediately with the persisted run record.
 
 - With `RESEARCH_MODE=fake`, the run uses the deterministic Phase 3 workflow and does not require API keys.
 - With `RESEARCH_MODE=real`, the run performs public web search, scraping, evidence extraction, deterministic report synthesis, scoring, outreach drafting, and quality review.
 - With `RESEARCH_MODE=real` and missing required keys, the run fails cleanly with a persisted failed run and error events.
+- If another run for the same campaign is already `pending` or `running`, the endpoint returns `400` with `A campaign run is already in progress.`
+
+### `GET /campaigns/{campaign_id}/runs`
+
+Returns campaign runs sorted newest first:
+
+```json
+{
+  "runs": []
+}
+```
+
+### `GET /campaigns/{campaign_id}/runs/latest`
+
+Returns the latest persisted run record for the campaign or `404` if no run exists.
 
 ### `GET /campaigns/{campaign_id}/runs/{run_id}`
 
@@ -109,6 +124,30 @@ Returns the persisted run record:
   "agent_thread_id": "run_...",
   "created_at": "2026-05-07T01:10:16.525376",
   "updated_at": "2026-05-07T01:10:16.612419"
+}
+```
+
+### `GET /campaigns/{campaign_id}/todos`
+
+Returns the latest todo plan written under `plan/todos.json`:
+
+```json
+{
+  "todos": [
+    {
+      "id": "todo_icp",
+      "title": "Define ICP and rubric",
+      "status": "completed"
+    }
+  ]
+}
+```
+
+If the todo file does not exist yet, the endpoint returns:
+
+```json
+{
+  "todos": []
 }
 ```
 

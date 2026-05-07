@@ -91,3 +91,33 @@ export type CampaignRun = {
   created_at: string;
   updated_at: string;
 };
+
+export type CampaignRunListResponse = {
+  runs: CampaignRun[];
+};
+
+export type ActivityEvent = {
+  id: string;
+  campaign_id: string;
+  run_id: string | null;
+  type: string;
+  message: string;
+  payload: Record<string, unknown> | null;
+  created_at: string;
+};
+
+export type ActivityEventListResponse = {
+  events: ActivityEvent[];
+};
+
+export type TodoStatus = "pending" | "in_progress" | "completed" | "failed";
+
+export type TodoItem = {
+  id: string;
+  title: string;
+  status: TodoStatus | string;
+};
+
+export type TodoListResponse = {
+  todos: TodoItem[];
+};

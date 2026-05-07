@@ -67,3 +67,12 @@ The frontend provides a basic landing page that confirms the project shell is ru
 - The shared frontend API client reads `NEXT_PUBLIC_API_BASE_URL`, defaults to `http://localhost:8000`, and preserves backend `detail` messages when requests fail
 - CSV parsing and validation remain backend-owned; the browser only submits `FormData` with a `file` field and renders the returned upload report
 - After upload or run start, the client calls `router.refresh()` so the server-rendered campaign status and account list stay aligned with backend state
+
+## Phase 7 progress visibility
+
+- Run start is now backgrounded with FastAPI `BackgroundTasks`, so `POST /campaigns/{campaign_id}/runs` returns quickly with a persisted run id instead of waiting for workflow completion
+- The background task creates its own database session, runs the coordinator locally in-process, and persists terminal `completed`, `partial`, or `failed` state back onto the run row and campaign row
+- The frontend progress page uses polling every 2 seconds for `GET /runs/{run_id}` or `GET /runs/latest`, `GET /events`, `GET /accounts`, and `GET /todos`
+- Polling stops when the run reaches a terminal state; websocket or SSE streaming is intentionally deferred to keep the MVP local and simple
+- Campaign todos are still workspace-backed in `plan/todos.json`, but the API now exposes them so the browser can show plan progress
+- Account progress is inferred from persisted `research_status` values instead of a separate progress subsystem

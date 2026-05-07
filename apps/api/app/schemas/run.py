@@ -21,3 +21,7 @@ class CampaignRunResponse(BaseModel):
 
 class CampaignRunCreateResponse(CampaignRunResponse):
     pass
+
+
+class CampaignRunListResponse(BaseModel):
+    runs: list[CampaignRunResponse]

@@ -44,7 +44,14 @@ The app starts on `http://localhost:3000` by default.
 
 ## Known limitations
 
-- There is no progress page yet.
 - There is no results dashboard yet.
 - There are no account detail pages yet.
 - Review and export workflows are not in the frontend yet.
+
+## Phase 7 browser validation
+
+1. Create a campaign and upload `samples/devtools_companies.csv`
+2. Start a run from the campaign detail page
+3. Confirm the browser navigates to `/campaigns/{campaignId}/run?runId={runId}`
+4. Confirm the run page shows status, account progress, todos, and activity
+5. Wait for polling to stop after `completed`, `failed`, or `partial`

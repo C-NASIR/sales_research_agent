@@ -14,7 +14,14 @@ from app.agents.fake_workflow import (
 from app.agents.real_research_workflow import get_real_research_context, real_account_researcher, real_signal_detector
 from app.config import settings
 from app.db.models import CampaignRun
-from app.services import account_service, campaign_service, event_service, result_service, run_service
+from app.services import (
+    account_service,
+    campaign_service,
+    event_service,
+    result_service,
+    run_service,
+    todo_service,
+)
 from app.services.research_service import ensure_real_research_ready
 from app.tools.research_synthesis import build_low_confidence_reports
 from app.tools.web_search import SearchError
@@ -254,10 +261,16 @@ def run_campaign_workflow(db: Session, campaign_id: str, run_id: str) -> None:
     todos = build_fake_todos()
     writers.write_todos(campaign_id, todos)
     event_service.record_event(db, campaign_id, "todo_created", "Run todo plan created", run_id=run_id)
+    todo_service.update_todo_status(campaign_id, "todo_icp", "in_progress")
 
     icp = fake_icp_strategist(brief)
     writers.write_icp(campaign_id, icp)
     event_service.record_event(db, campaign_id, "icp_created", "ICP plan created", run_id=run_id)
+    todo_service.update_todo_status(campaign_id, "todo_icp", "completed")
+    todo_service.update_todo_status(campaign_id, "todo_research", "in_progress")
+    todo_service.update_todo_status(campaign_id, "todo_signals", "in_progress")
+    todo_service.update_todo_status(campaign_id, "todo_scoring", "in_progress")
+    todo_service.update_todo_status(campaign_id, "todo_outreach", "in_progress")
 
     success_count = 0
     failed_count = 0
@@ -554,14 +567,26 @@ def run_campaign_workflow(db: Session, campaign_id: str, run_id: str) -> None:
         final_status = "failed"
         final_event_type = "run_failed"
         final_message = "Campaign run failed"
+        todo_service.update_todo_status(campaign_id, "todo_research", "failed")
+        todo_service.update_todo_status(campaign_id, "todo_signals", "failed")
+        todo_service.update_todo_status(campaign_id, "todo_scoring", "failed")
+        todo_service.update_todo_status(campaign_id, "todo_outreach", "failed")
     elif failed_count > 0:
         final_status = "partial"
         final_event_type = "run_partial"
         final_message = "Campaign run completed with partial failures"
+        todo_service.update_todo_status(campaign_id, "todo_research", "completed")
+        todo_service.update_todo_status(campaign_id, "todo_signals", "completed")
+        todo_service.update_todo_status(campaign_id, "todo_scoring", "completed")
+        todo_service.update_todo_status(campaign_id, "todo_outreach", "completed")
     else:
         final_status = "completed"
         final_event_type = "run_completed"
         final_message = "Campaign run completed"
+        todo_service.update_todo_status(campaign_id, "todo_research", "completed")
+        todo_service.update_todo_status(campaign_id, "todo_signals", "completed")
+        todo_service.update_todo_status(campaign_id, "todo_scoring", "completed")
+        todo_service.update_todo_status(campaign_id, "todo_outreach", "completed")
 
     run_service.update_run_status(db, run, final_status, completed=True)
     campaign_service.update_campaign_status(db, campaign_id, final_status)

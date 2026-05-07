@@ -75,4 +75,4 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev
 5. Confirm the uploaded accounts appear in the table
 6. Start the research run from the same page
 
-This Phase 6 browser flow stops after run creation. Progress, results, review, and export arrive in later phases.
+The browser can now show run progress through polling after run start. Results, review, and export arrive in later phases.

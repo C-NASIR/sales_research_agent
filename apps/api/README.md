@@ -90,7 +90,21 @@ curl http://localhost:8000/campaigns/campaign_REPLACE_ME/events
 curl -X POST http://localhost:8000/campaigns/campaign_REPLACE_ME/runs
 ```
 
+This now returns quickly and continues the workflow in the background.
+
 With `RESEARCH_MODE=real`, a misconfigured backend returns a clear run failure instead of crashing at import time.
+
+## Get latest run
+
+```bash
+curl http://localhost:8000/campaigns/campaign_REPLACE_ME/runs/latest
+```
+
+## Get todos
+
+```bash
+curl http://localhost:8000/campaigns/campaign_REPLACE_ME/todos
+```
 
 ## Phase 5 validation flow
 
