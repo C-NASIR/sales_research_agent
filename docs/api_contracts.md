@@ -1,6 +1,6 @@
 # API contracts
 
-## Implemented in Phase 0
+## Implemented in Phase 1
 
 ### `GET /health`
 
@@ -13,11 +13,50 @@ Returns a simple service health payload:
 }
 ```
 
+### `POST /campaigns`
+
+Creates a new campaign in `draft` status and records a `campaign_created` activity event.
+
+### `GET /campaigns`
+
+Returns all campaigns:
+
+```json
+{
+  "campaigns": []
+}
+```
+
+### `GET /campaigns/{campaign_id}`
+
+Returns a single campaign or `404` if it does not exist.
+
+### `GET /campaigns/{campaign_id}/accounts`
+
+Returns campaign accounts:
+
+```json
+{
+  "accounts": []
+}
+```
+
+In Phase 1 this will usually be empty because CSV upload is not implemented yet.
+
+### `GET /campaigns/{campaign_id}/events`
+
+Returns campaign activity events:
+
+```json
+{
+  "events": []
+}
+```
+
 ## Planned, not implemented yet
 
-- `POST /campaigns`
 - `POST /campaigns/{campaign_id}/upload`
 - `POST /campaigns/{campaign_id}/runs`
 - `GET /campaigns/{campaign_id}/results`
-
-These endpoints are placeholders for later phases and are intentionally not implemented in Phase 0.
+- `PATCH /campaigns/{campaign_id}/accounts/{account_id}/review`
+- `POST /campaigns/{campaign_id}/exports`

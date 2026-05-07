@@ -5,13 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "prospecting-agent-api"
 version = "0.1.0"
-description = "Phase 0 FastAPI backend for Prospecting Agent"
+description = "Phase 1 FastAPI backend for Prospecting Agent"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.0,<1.0.0",
   "uvicorn>=0.30.0,<1.0.0",
   "python-dotenv>=1.0.0,<2.0.0",
+  "sqlalchemy>=2.0.0,<3.0.0",
 ]
 
 [tool.setuptools]
-packages = ["app", "app.api"]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["app*"]

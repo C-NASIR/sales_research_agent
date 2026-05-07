@@ -6,16 +6,18 @@ Prospecting Agent is a local full-stack sales research workspace that will event
 
 The MVP is intended to let a user create a campaign, upload target companies, run research, review results, and export approved prospects from one local workspace.
 
-## Phase 0 scope
+## Current scope
 
-Phase 0 sets up the runnable project foundation only:
+The project currently includes Phase 0 and Phase 1:
 
 - Minimal FastAPI backend with a root endpoint and `GET /health`
+- SQLite-backed backend foundation for campaigns, accounts, events, and future report entities
+- Campaign APIs for create, list, get, and campaign-scoped accounts and events
 - Minimal Next.js frontend with a landing page
 - Root documentation, environment examples, and sample CSV data
 - Local project folders for future campaign workspaces
 
-Phase 0 does not include a database, CSV upload flows, Deep Agents, authentication, CRM integrations, or production deployment.
+The project does not include CSV upload flows, Deep Agents, authentication, CRM integrations, or production deployment yet.
 
 ## Local setup
 

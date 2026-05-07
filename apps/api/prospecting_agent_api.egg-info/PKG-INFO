@@ -1,8 +1,9 @@
 Metadata-Version: 2.4
 Name: prospecting-agent-api
 Version: 0.1.0
-Summary: Phase 0 FastAPI backend for Prospecting Agent
+Summary: Phase 1 FastAPI backend for Prospecting Agent
 Requires-Python: >=3.11
 Requires-Dist: fastapi<1.0.0,>=0.115.0
 Requires-Dist: uvicorn<1.0.0,>=0.30.0
 Requires-Dist: python-dotenv<2.0.0,>=1.0.0
+Requires-Dist: sqlalchemy<3.0.0,>=2.0.0
