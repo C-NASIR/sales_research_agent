@@ -1,96 +1,276 @@
-# System design
+# System Design
 
-## High-level architecture
+## Overview
 
-The project uses a simple monorepo with two runnable apps:
+Prospecting Agent is a local monorepo that implements a supervised sales research workflow. A user creates a campaign, uploads a CSV of target companies, starts a research run, reviews account-level outputs, edits outreach drafts, and exports approved prospects.
 
-- A Next.js frontend in `apps/web`
-- A FastAPI backend in `apps/api`
+The system is intentionally simple:
 
-## Current responsibilities
+- `apps/api` is a FastAPI backend that owns orchestration, persistence, validation, and export generation.
+- `apps/web` is a Next.js app that renders the campaign, run, results, review, and export workflows.
+- `data/` stores the SQLite database plus campaign-specific workspace artifacts on disk.
+- `docs/` describes the API contracts, data model, and system design.
 
-The frontend provides a basic landing page that confirms the project shell is running. The backend now provides:
+The MVP is optimized for local execution rather than multi-user production deployment. There is no authentication layer, queue infrastructure, CRM sync, or outbound email delivery.
 
-- Root and health endpoints for local verification
-- A SQLite-backed state layer for campaigns, accounts, runs, events, exports, and future report entities
-- Campaign APIs for creating and reading campaigns plus listing campaign accounts and events
-- Phase 2 campaign workspace creation under `data/campaigns/{campaign_id}`
-- CSV input processing that normalizes company rows, detects duplicates, creates account records, and writes input artifacts to disk
-- A Phase 3 deterministic workflow that remains available as a fallback path
-- A Phase 4 real research workflow that searches the public web, scrapes selected pages, extracts deterministic evidence, synthesizes reports, persists result rows, and exposes ranked results through the API
+## High-Level Architecture
 
-## Workflow modes
+```text
+Browser
+  -> Next.js frontend (`apps/web`)
+  -> FastAPI backend (`apps/api`)
+  -> SQLite database (`data/prospecting_agent.db`)
+  -> Campaign workspace files (`data/campaigns/{campaign_id}/...`)
+  -> Optional external research services (Tavily + Firecrawl)
+```
 
-- The coordinator reads `input/brief.json` and `input/normalized_accounts.json`
-- It writes `plan/todos.json` and `plan/icp.json`
-- `RESEARCH_MODE=fake` keeps the deterministic Phase 3 account researcher and signal detector
-- `RESEARCH_MODE=real` runs Tavily search, Firecrawl scraping with `httpx` and BeautifulSoup fallback, deterministic snippet extraction, and deterministic report synthesis
-- Each account gets research, signal, score, outreach, and review JSON files
-- Real mode also writes `research/sources/{account_id}.json` for debugging source collection without bloating the primary report files
-- Optional Deep Agents wiring still exists, but the default local workflow remains deterministic
+The backend uses a dual-storage model:
 
-## Phase 5 scoring and outreach pipeline
+- SQLite stores normalized application state for campaigns, accounts, runs, events, reports, drafts, and exports.
+- Workspace JSON and text files store campaign inputs and generated artifacts in a human-inspectable file tree.
 
-- The coordinator keeps the same run surface but now delegates scoring, persona recommendation, sales angle generation, outreach drafting, and quality review to shared deterministic tool modules
-- `scoring_tools.py` turns research evidence plus timing signals into explainable fit, timing, confidence, persona, and overall scores
-- `persona_tools.py` chooses the best target persona based on the campaign brief and evidence-backed company context
-- `outreach_tools.py` generates a short sales angle, selects one personalization anchor when available, and drafts a cautious outreach email
-- `quality_review_tools.py` checks for fake familiarity, deceptive subject lines, unsupported claims, weak evidence, and missing personalization
-- Research evidence stays separate from inference: the score and outreach steps can reason from evidence-backed fields, but they do not invent unsupported company pain
+This split keeps the API easy to query while preserving the intermediate artifacts that were used to produce a result.
 
-## Subagent responsibilities
+## Repository Structure
 
-- ICP strategist: campaign rubric and target criteria
-- Account researcher: fake simulated research or real public-source synthesis depending on configuration
-- Signal detector: fake timing signals or real source-backed timing signals depending on configuration
-- Scoring analyst: deterministic weighted scores based on fit claims, signal timing, evidence count, and persona alignment
-- Outreach writer: short draft anchored to research evidence when available
-- Compliance reviewer: checks personalization, unsupported familiarity, missing sources, deceptive framing, and weak evidence
+### Backend
 
-## Persistence
+- `app/main.py`: FastAPI app bootstrap, CORS, exception handlers, router registration, database initialization.
+- `app/api/`: HTTP routes for campaigns, uploads, runs, results, reviews, exports, events, todos, and health.
+- `app/services/`: business logic for campaign creation, CSV parsing, run management, review updates, exports, workspace setup, and result persistence.
+- `app/agents/`: workflow orchestration for fake mode and real-research mode.
+- `app/tools/`: deterministic research synthesis, source extraction, scoring, persona selection, outreach drafting, quality review, export generation, search, and scraping helpers.
+- `app/db/`: SQLAlchemy models, engine/session setup, and schema initialization.
+- `app/workspace/`: path helpers plus JSON/markdown readers and writers.
 
-- Campaign runs are stored in SQLite as `CampaignRun`
-- Structured results are upserted into `ResearchReport`, `SignalReport`, `ScoreReport`, and `OutreachDraft`
-- Real source URLs are preserved inside the JSON evidence and signal payloads stored in SQLite
-- Quality review remains a workspace file under `review/{account_id}.json`
+### Frontend
 
-## Planned expansion
+- `app/`: Next.js App Router pages for campaign list/create/detail, run progress, results, and account detail.
+- `components/`: UI and workflow components grouped by area (`campaign`, `run`, `results`, `account`, `review`, `ui`).
+- `lib/api.ts`: typed HTTP client used by server and client components.
+- `lib/types.ts`: frontend response and domain types aligned to the backend API.
 
-- A future Deep Agents coordinator will manage multi-step research and enrichment workflows.
-- Later phases will add research orchestration, scoring, review, and export workflows on top of the Phase 2 input foundation.
+## Backend Design
 
-## Phase 6 frontend campaign setup
+### API Layer
 
-- The Next.js app now exposes the first usable browser workflow: campaign list, campaign creation, campaign detail, CSV upload, account preview, and run start
-- Route pages stay server-rendered so campaign lists and detail views fetch directly from the FastAPI API on navigation
-- React Query is used for client-side mutations only: create campaign, upload CSV, and start run
-- The shared frontend API client reads `NEXT_PUBLIC_API_BASE_URL`, defaults to `http://localhost:8000`, and preserves backend `detail` messages when requests fail
-- CSV parsing and validation remain backend-owned; the browser only submits `FormData` with a `file` field and renders the returned upload report
-- After upload or run start, the client calls `router.refresh()` so the server-rendered campaign status and account list stay aligned with backend state
+FastAPI exposes a thin route layer. Endpoints validate request shape, load referenced campaign/account records, and delegate business logic to services.
 
-## Phase 7 progress visibility
+Important route groups:
 
-- Run start is now backgrounded with FastAPI `BackgroundTasks`, so `POST /campaigns/{campaign_id}/runs` returns quickly with a persisted run id instead of waiting for workflow completion
-- The background task creates its own database session, runs the coordinator locally in-process, and persists terminal `completed`, `partial`, or `failed` state back onto the run row and campaign row
-- The frontend progress page uses polling every 2 seconds for `GET /runs/{run_id}` or `GET /runs/latest`, `GET /events`, `GET /accounts`, and `GET /todos`
-- Polling stops when the run reaches a terminal state; websocket or SSE streaming is intentionally deferred to keep the MVP local and simple
-- Campaign todos are still workspace-backed in `plan/todos.json`, but the API now exposes them so the browser can show plan progress
-- Account progress is inferred from persisted `research_status` values instead of a separate progress subsystem
+- Campaign setup: create and list campaigns.
+- CSV ingestion: upload a target-company CSV, normalize domains, detect invalid and duplicate rows, and create accounts.
+- Run control: start a background run, list runs, fetch latest run, and fetch a specific run.
+- Read models: list accounts, list events, fetch todos, fetch results, and fetch account detail.
+- Review and export mutations: update review status, edit outreach drafts, create exports, and download generated files.
 
-## Phase 8 results and account detail
+Error handling is centralized:
 
-- The frontend now adds two read-only result routes: `/campaigns/{campaignId}/results` for ranked campaign output and `/campaigns/{campaignId}/accounts/{accountId}` for one-account inspection
-- The results dashboard fetches `GET /campaigns/{campaign_id}` plus `GET /campaigns/{campaign_id}/results`, then applies client-side search, status filtering, quality filtering, and minimum-score filtering without changing backend contracts
-- The account detail page fetches `GET /campaigns/{campaign_id}` plus `GET /campaigns/{campaign_id}/accounts/{account_id}` and renders missing optional artifacts defensively so incomplete accounts do not crash the page
-- Evidence is rendered as compact cards that expose the claim, supporting evidence, confidence, evidence type, and source URL, while timing signals get a matching read model with `why_now` context
-- Scores are shown both as high-level pills and as a raw explanation plus compact JSON breakdown so the user can inspect the scoring rationale without editing it
-- Quality review remains read-only in Phase 8: the UI surfaces quality status, issues, blocked reasons, and recommended edits, but does not yet allow approve, reject, edit, or export actions
+- Validation errors are converted to `400` JSON responses with a top-level `detail`.
+- Missing resources return `404`.
+- Run conflicts return `409`.
+- Unhandled exceptions are logged and returned as `500 Internal server error.`
 
-## Phase 9 review workflow and export
+### Service Layer
 
-- Review status is now a supervised user-controlled field on each account, with explicit `approved`, `rejected`, `needs_edit`, `not_enough_evidence`, and `unreviewed` states
-- Draft editing stays local to the app: the user can change the generated outreach subject, body, personalization source, personalization URL, and sales angle, but the system still does not send anything
-- After any draft edit, the backend rewrites the workspace outreach file and reruns `quality_review_tools.py` so the quality panel reflects the edited draft instead of stale generated output
-- Export generation is campaign-scoped and review-gated: only approved accounts are included by default, though the user can opt into other review statuses when generating an export
-- The export subsystem writes three file types under `data/campaigns/{campaign_id}/exports`: `prospects.csv` for spreadsheet use, `campaign_report.md` for human-readable review, and `archive.json` for structured debugging or future import
-- No email sending exists in the MVP because Phase 9 is still a supervised preparation workflow, not an execution workflow
+The service layer holds almost all application behavior:
+
+- `campaign_service`: creates campaigns, assigns IDs, stores the workspace path, and writes `input/brief.json`.
+- `csv_service`: parses UTF-8 CSV input, normalizes domains, and reports invalid or duplicate rows.
+- `account_service`: creates accounts and updates per-account research status.
+- `run_service`: creates `CampaignRun` rows and launches the workflow in a FastAPI `BackgroundTasks` job.
+- `result_service`: upserts research, signal, score, and outreach records, and assembles result/detail read models.
+- `review_service`: updates supervised review status, rewrites edited drafts, reruns quality review, and persists the updated review artifact.
+- `export_service`: selects exportable accounts, generates files, and upserts `ExportFile` records.
+- `event_service`: persists activity events and logs important event types.
+- `todo_service`: manages the workflow todo file in workspace storage.
+
+### Workflow Orchestration
+
+The active orchestration path is `run_service.execute_campaign_run()` -> `agents.coordinator.run_campaign_workflow()`.
+
+The workflow does the following:
+
+1. Load the campaign brief and normalized accounts from workspace files.
+2. Create a todo plan and ICP artifact.
+3. Iterate over campaign accounts one by one.
+4. Run research in either fake mode or real mode.
+5. Persist research and signal outputs.
+6. Deterministically score the account.
+7. Generate an outreach draft.
+8. Run quality review on the draft.
+9. Update account and campaign statuses and emit activity events.
+
+The implementation is synchronous inside the background task. Accounts are processed sequentially; there is no job queue, worker pool, or distributed execution layer.
+
+### Research Modes
+
+The backend supports two research modes controlled by `RESEARCH_MODE`:
+
+- `fake`: deterministic simulated research with no external API calls.
+- `real`: public-web research using Tavily search plus Firecrawl or an `httpx`/BeautifulSoup fallback for page scraping.
+
+Real mode flow:
+
+1. Build search queries for the company and domain.
+2. Collect and deduplicate public search results.
+3. Prioritize URLs such as homepage, pricing, careers, blog, engineering, and product pages.
+4. Scrape a bounded number of pages.
+5. Extract evidence snippets by keyword matching.
+6. Synthesize research and timing reports from the gathered evidence.
+
+If research fails or yields weak evidence, the system writes low-confidence fallback reports instead of aborting the whole campaign when possible. This keeps downstream scoring, drafting, and review steps operational.
+
+### Deterministic Post-Research Pipeline
+
+After research, the remaining pipeline is heuristic and deterministic:
+
+- `scoring_tools.py` computes fit, timing, confidence, persona, and overall scores from evidence and signal structure.
+- `persona_tools.py` recommends a target persona from campaign personas plus evidence text.
+- `outreach_tools.py` creates a sales angle, chooses a personalization source, and drafts subject/body copy.
+- `quality_review_tools.py` flags unsupported claims, missing personalization, deceptive framing, fake familiarity, and low-confidence evidence.
+
+Although the project references Deep Agents and exposes `MODEL_NAME` and `USE_DEEP_AGENTS` settings, the current run path does not execute an LLM-based multi-agent runtime. The MVP behavior is driven by deterministic service and tool code.
+
+## Persistence Model
+
+### Relational State in SQLite
+
+SQLite stores the normalized state required by the API:
+
+- `Campaign`
+- `Account`
+- `CampaignRun`
+- `ActivityEvent`
+- `ResearchReport`
+- `SignalReport`
+- `ScoreReport`
+- `OutreachDraft`
+- `ExportFile`
+
+SQLAlchemy models use simple foreign-key relationships and `create_all()` on startup. There is no migration framework yet; schema changes currently require recreating the local database when incompatible.
+
+### Workspace File Model
+
+Each campaign has a dedicated workspace under:
+
+```text
+data/campaigns/{campaign_id}/
+```
+
+Subdirectories:
+
+- `input/`
+- `plan/`
+- `research/`
+- `signals/`
+- `scores/`
+- `outreach/`
+- `review/`
+- `exports/`
+
+Representative files:
+
+- `input/brief.json`
+- `input/uploaded_companies.csv`
+- `input/normalized_accounts.json`
+- `input/upload_report.json`
+- `plan/todos.json`
+- `plan/icp.json`
+- `research/{account_id}.json`
+- `research/sources/{account_id}.json`
+- `signals/{account_id}.json`
+- `scores/{account_id}.json`
+- `outreach/{account_id}.json`
+- `review/{account_id}.json`
+- `exports/prospects.csv`
+- `exports/campaign_report.md`
+- `exports/archive.json`
+
+The database is the primary API datastore, while workspace files are the primary artifact store.
+
+## Frontend Design
+
+The frontend is a Next.js App Router application with a small typed API client and React Query for client-side mutations and refreshes.
+
+### Rendering Strategy
+
+- Page-level route components are mostly server components that fetch initial data from the API.
+- Interactive workspaces are client components that use React Query for mutations, invalidation, polling, and refresh.
+
+Examples:
+
+- Campaign detail page renders the brief, CSV uploader, account preview table, and start-run control.
+- Run progress page polls the latest run, todos, events, and account statuses every 2 seconds until the run reaches a terminal state.
+- Results page renders summary cards, filters, export controls, and the ranked results table.
+- Account detail page shows research, signals, evidence, score breakdown, outreach draft, draft editor, review controls, and quality review.
+
+### Frontend State Model
+
+The frontend keeps very little local domain state:
+
+- React Query caches fetched API responses.
+- Forms and filters use local component state.
+- Mutations invalidate the relevant query keys to refresh results and account detail views.
+
+There is no global client-side state store beyond the React Query cache.
+
+## End-to-End Data Flow
+
+### Campaign Setup
+
+1. User submits campaign metadata from the web app.
+2. Backend creates a `Campaign` row and campaign workspace.
+3. Backend writes the campaign brief to `input/brief.json`.
+4. User uploads a CSV.
+5. Backend parses rows, normalizes domains, creates `Account` rows, writes upload artifacts, and marks the campaign `ready` if accounts were created.
+
+### Run Execution
+
+1. User starts a run from the campaign detail page.
+2. Backend creates a `CampaignRun` row and enqueues a FastAPI background task.
+3. The background task updates account statuses, runs research/account processing, and emits events.
+4. The frontend polls run status, todos, accounts, and events until the run is `completed`, `partial`, or `failed`.
+
+### Review and Export
+
+1. Results page loads ranked account summaries from the database.
+2. Account detail page loads the merged account record plus workspace artifacts.
+3. User updates review status or edits a draft.
+4. Backend persists the mutation, rewrites relevant workspace JSON, reruns quality review if needed, and emits events.
+5. User creates exports for selected review statuses.
+6. Backend builds CSV, Markdown, and JSON export artifacts and exposes them through download routes.
+
+## External Dependencies
+
+The system can run fully offline in `fake` mode. In `real` mode it depends on:
+
+- Tavily for search
+- Firecrawl for scraping when configured
+- `httpx` plus BeautifulSoup as a fallback scraper
+
+The frontend depends on the backend through `NEXT_PUBLIC_API_BASE_URL`, which defaults to `http://localhost:8000`.
+
+## Testing and Validation
+
+Current automated coverage is split by app:
+
+- Backend: Pytest coverage for health, campaigns, CSV upload, scoring, review/export flows, and related API behavior.
+- Frontend: TypeScript typecheck, ESLint, and focused Vitest component tests.
+
+There are no end-to-end browser tests in the current codebase.
+
+## Design Constraints and Limitations
+
+- Single-node local architecture only.
+- No authentication or user isolation.
+- No migration framework for database schema evolution.
+- Background work runs in-process through FastAPI `BackgroundTasks`, so jobs are not durable across process restarts.
+- Account processing is sequential.
+- Real research quality is bounded by public-source discovery and simple heuristic extraction.
+- Export generation is local filesystem output only.
+- The app does not send email, write to a CRM, or sync to third-party sales systems.
+
+## Summary
+
+The current system is a pragmatic local MVP: FastAPI owns orchestration and persistence, Next.js provides the review workspace, SQLite stores normalized application state, and campaign workspace files preserve generated artifacts. The design favors inspectability and straightforward iteration over distributed scale or production-hard multi-user concerns.
