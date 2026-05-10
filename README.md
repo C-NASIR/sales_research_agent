@@ -1,4 +1,4 @@
-# Prospecting Agent
+# Prospecting Agent 🚧
 
 Prospecting Agent is a local full-stack sales research workspace that coordinates account research, scoring, outreach drafting, supervised review, and export workflows.
 
