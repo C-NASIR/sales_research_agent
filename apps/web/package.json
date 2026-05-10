@@ -1,9 +1,9 @@
 {
-  "name": "prospecting-agent-web-vite",
+  "name": "prospecting-agent-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite dev",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
