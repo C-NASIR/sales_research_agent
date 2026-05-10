@@ -29,7 +29,7 @@ CRM integrations, email sending, authentication, billing, and production deploym
 
 1. Copy `.env.example` to `.env` if you want to customize local values.
 2. Start the backend from `apps/api`.
-3. Start the frontend from `apps/web`.
+3. Start the frontend from `apps/web-vite`.
 
 For Phase 4 there are two research modes:
 
@@ -49,7 +49,7 @@ uvicorn app.main:app --reload
 ## Frontend run instructions
 
 ```bash
-cd apps/web
+cd apps/web-vite
 npm install
 npm run dev
 ```
@@ -57,7 +57,7 @@ npm run dev
 If you need a custom backend URL:
 
 ```bash
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000 npm run dev
+VITE_API_BASE_URL=http://localhost:8000 npm run dev
 ```
 
 ## Expected URLs
@@ -95,7 +95,7 @@ python3 -m pytest
 Frontend:
 
 ```bash
-cd apps/web
+cd apps/web-vite
 npm run typecheck
 npm run lint
 npm run test
