@@ -2,7 +2,8 @@
 
 Prospecting Agent is a local full-stack sales research workspace that coordinates account research, scoring, outreach drafting, supervised review, and export workflows.
 
-## How it works 
+## How it works
+
 A user can give the system a product, an ideal customer profile, and a list of companies. The system researches those companies, scores them, explains the reasoning, drafts outreach, lets the user review the work, and exports a usable prospecting file.
 
 ## MVP goal
@@ -29,7 +30,7 @@ CRM integrations, email sending, authentication, billing, and production deploym
 
 1. Copy `.env.example` to `.env` if you want to customize local values.
 2. Start the backend from `apps/api`.
-3. Start the frontend from `apps/web-vite`.
+3. Start the frontend from `apps/web`.
 
 For Phase 4 there are two research modes:
 
@@ -49,7 +50,7 @@ uvicorn app.main:app --reload
 ## Frontend run instructions
 
 ```bash
-cd apps/web-vite
+cd apps/web
 npm install
 npm run dev
 ```
@@ -95,7 +96,7 @@ python3 -m pytest
 Frontend:
 
 ```bash
-cd apps/web-vite
+cd apps/web
 npm run typecheck
 npm run lint
 npm run test
