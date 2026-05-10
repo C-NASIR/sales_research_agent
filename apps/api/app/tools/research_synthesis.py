@@ -17,15 +17,16 @@ def synthesize_research_report(
     confidence = _research_confidence(evidence_items)
 
     if evidence_items:
+        top_evidence = "; ".join(_clean_evidence(item.get("evidence", "")) for item in evidence_items[:2])
         summary = (
-            f"Public web research suggests {account['company_name']} has a relevant product or workflow footprint. "
-            f"This summary is grounded in public pages and search results collected in Phase 4."
+            f"Public research indicates {account['company_name']} has a relevant software or workflow footprint. "
+            f"Key evidence includes {top_evidence}."
         )
         business_model = _infer_business_model(evidence_items)
-        risks = []
+        risks = _build_research_risks(source_summaries, evidence_items, confidence)
     else:
         summary = (
-            f"Public research for {account['company_name']} was inconclusive in Phase 4. "
+            f"Public research for {account['company_name']} was inconclusive. "
             "The account may still be relevant, but the current evidence base is weak."
         )
         business_model = "Inconclusive from public sources"
@@ -61,11 +62,12 @@ def synthesize_signal_report(
     signals: list[dict] = []
     for item in evidence_items:
         evidence_type = item.get("evidence_type", "unknown")
+        snippet = _clean_evidence(item.get("evidence", ""))
         if evidence_type == "careers":
             signals.append(
                 {
                     "type": "hiring_signal",
-                    "description": "A careers or jobs page was found during research.",
+                    "description": f"Public hiring evidence: {snippet}",
                     "why_it_matters": "Active hiring can indicate team growth or ongoing operational investment.",
                     "source_url": item["source_url"],
                     "confidence": item["confidence"],
@@ -75,7 +77,7 @@ def synthesize_signal_report(
             signals.append(
                 {
                     "type": "engineering_activity",
-                    "description": "Engineering or blog content was found on public sources.",
+                    "description": f"Engineering activity evidence: {snippet}",
                     "why_it_matters": "Recent engineering content can indicate ongoing product and team activity.",
                     "source_url": item["source_url"],
                     "confidence": item["confidence"],
@@ -85,7 +87,7 @@ def synthesize_signal_report(
             signals.append(
                 {
                     "type": "business_model_signal",
-                    "description": "A pricing page was identified.",
+                    "description": f"Commercial evidence: {snippet}",
                     "why_it_matters": "Pricing information helps confirm product packaging and commercial intent.",
                     "source_url": item["source_url"],
                     "confidence": item["confidence"],
@@ -99,7 +101,7 @@ def synthesize_signal_report(
                 signals.append(
                     {
                         "type": "funding_signal",
-                        "description": "A search snippet mentioned funding, but the claim was not verified by a scraped page.",
+                        "description": f"Unverified funding reference from search: {_clean_evidence(result.get('snippet') or '')}",
                         "why_it_matters": "Funding can indicate momentum, but this signal remains low confidence until verified.",
                         "source_url": result["url"],
                         "confidence": "low",
@@ -110,7 +112,7 @@ def synthesize_signal_report(
     source_summaries = _build_source_summaries(search_results, scraped_sources)
     if signals:
         timing_score = min(85, 45 + len(signals) * 10)
-        why_now = "Public sources suggest some current commercial or engineering activity worth a cautious outbound test."
+        why_now = _build_why_now(signals)
         confidence = 70 if any(signal["confidence"] == "high" for signal in signals) else 55
     else:
         timing_score = 30
@@ -205,3 +207,39 @@ def _infer_business_model(evidence_items: list[dict]) -> str:
     if "open source" in text:
         return "Open source with commercial offering"
     return "Software business inferred from public sources"
+
+
+def _clean_evidence(value: str) -> str:
+    cleaned = " ".join(value.split())
+    cleaned = cleaned[:160].rstrip(" ,.;:")
+    if not cleaned:
+        return "limited public evidence"
+    return cleaned.lower()
+
+
+def _build_why_now(signals: list[dict]) -> str:
+    descriptions = [signal["description"] for signal in signals[:2] if signal.get("description")]
+    if not descriptions:
+        return "Public sources suggest some current activity worth a cautious outbound test."
+    return f"Public sources suggest current activity worth testing because {descriptions[0].rstrip('.')}."
+
+
+def _build_research_risks(source_summaries: list[dict], evidence_items: list[dict], confidence: int) -> list[dict]:
+    risks: list[dict] = []
+    if len(source_summaries) <= 1:
+        risks.append(
+            {
+                "risk": "Limited source diversity",
+                "reason": "Most conclusions come from a narrow set of public pages.",
+                "confidence": "medium",
+            }
+        )
+    if len(evidence_items) <= 1 or confidence < 50:
+        risks.append(
+            {
+                "risk": "Thin public evidence",
+                "reason": "The current evidence base is usable but still limited for strong personalization.",
+                "confidence": "medium",
+            }
+        )
+    return risks

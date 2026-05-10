@@ -42,6 +42,7 @@ class Settings:
     data_dir: Path
     database_url: str
     model_name: str
+    workflow_provider_mode: str
     use_deep_agents: bool
     research_mode: str
     tavily_api_key: str
@@ -62,6 +63,7 @@ settings = Settings(
         data_dir,
     ),
     model_name=os.getenv("MODEL_NAME", "openai:gpt-4.1-mini"),
+    workflow_provider_mode=os.getenv("WORKFLOW_PROVIDER_MODE", "live").strip().lower(),
     use_deep_agents=_parse_bool(os.getenv("USE_DEEP_AGENTS", "false")),
     research_mode=os.getenv("RESEARCH_MODE", "real").strip().lower(),
     tavily_api_key=os.getenv("TAVILY_API_KEY", ""),

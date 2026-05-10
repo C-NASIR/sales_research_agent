@@ -3,6 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from app.config import settings
+from app.providers.scrape_provider import ensure_scrape_provider_ready
+from app.providers.search_provider import SearchProviderError, ensure_search_provider_ready
+from app.providers.structured_llm import StructuredGenerationError, ensure_structured_llm_ready
 from app.tools.research_synthesis import build_low_confidence_reports, synthesize_research_report, synthesize_signal_report
 from app.tools.source_extraction import build_evidence_items
 from app.tools.web_scrape import scrape_company_sources
@@ -23,18 +26,14 @@ class ResearchContext:
 
 
 def ensure_real_research_ready() -> None:
-    if settings.research_mode not in {"fake", "real"}:
-        raise ResearchConfigurationError("RESEARCH_MODE must be either 'fake' or 'real'")
     if settings.research_mode != "real":
-        return
-    missing = []
-    if not settings.tavily_api_key:
-        missing.append("TAVILY_API_KEY")
-    if not settings.firecrawl_api_key:
-        missing.append("FIRECRAWL_API_KEY")
-    if missing:
-        joined = ", ".join(missing)
-        raise ResearchConfigurationError(f"Real research mode requires: {joined}")
+        raise ResearchConfigurationError("RESEARCH_MODE only supports 'real'")
+    try:
+        ensure_search_provider_ready()
+        ensure_scrape_provider_ready()
+        ensure_structured_llm_ready()
+    except (SearchProviderError, StructuredGenerationError, RuntimeError) as exc:
+        raise ResearchConfigurationError(str(exc)) from exc
 
 
 def get_cached_research_context(account: dict) -> ResearchContext | None:

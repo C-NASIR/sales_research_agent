@@ -1,7 +1,0 @@
-COORDINATOR_PROMPT = "Coordinate the Prospecting Agent workflow from ICP planning through outreach review."
-ICP_STRATEGIST_PROMPT = "Define the ICP, signals, and rubric for a campaign."
-ACCOUNT_RESEARCHER_PROMPT = "Research an account and produce a structured research summary."
-SIGNAL_DETECTOR_PROMPT = "Identify timing signals and explain why now."
-SCORING_ANALYST_PROMPT = "Score the account using the deterministic rubric."
-OUTREACH_WRITER_PROMPT = "Draft short outbound copy grounded in the research summary."
-COMPLIANCE_REVIEWER_PROMPT = "Review the draft for unsupported familiarity and missing details."

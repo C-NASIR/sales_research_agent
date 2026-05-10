@@ -65,6 +65,11 @@ def build_evidence_items(
     icp: dict,
 ) -> list[dict]:
     keywords = KEYWORDS + [company_name.lower(), domain.lower()]
+    keywords.extend(_tokenize_keywords(campaign_brief.get("product_description")))
+    keywords.extend(_tokenize_keywords(campaign_brief.get("pain_statement")))
+    keywords.extend(_tokenize_keywords(campaign_brief.get("ideal_customer_profile")))
+    for item in icp.get("positive_signals") or []:
+        keywords.extend(_tokenize_keywords(item))
     evidence_items: list[dict] = []
     for source in sources:
         if not source.success:
@@ -83,3 +88,9 @@ def build_evidence_items(
                 }
             )
     return evidence_items
+
+
+def _tokenize_keywords(value: str | None) -> list[str]:
+    if not value:
+        return []
+    return [token.lower() for token in value.replace(",", " ").split() if len(token) >= 4]

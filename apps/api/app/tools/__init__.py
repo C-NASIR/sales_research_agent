@@ -1,1 +1,1 @@
-"""Tool helpers for deterministic Phase 3 workflow."""
+"""Tool helpers for the real, source-backed workflow."""

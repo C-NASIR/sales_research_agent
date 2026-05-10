@@ -20,9 +20,9 @@ def main() -> None:
         help="Path to a CSV file with company_name and domain columns.",
     )
     parser.add_argument(
-        "--run-fake-workflow",
+        "--run-workflow",
         action="store_true",
-        help="Execute the fake workflow after seeding accounts. Requires RESEARCH_MODE=fake.",
+        help="Execute the real workflow after seeding accounts. Requires RESEARCH_MODE=real.",
     )
     args = parser.parse_args()
 
@@ -95,14 +95,14 @@ def main() -> None:
             )
 
         run_note = "Seeded campaign and accounts only."
-        if args.run_fake_workflow:
-            if settings.research_mode != "fake":
-                run_note = "Skipped fake workflow because RESEARCH_MODE is not set to fake."
+        if args.run_workflow:
+            if settings.research_mode != "real":
+                run_note = "Skipped workflow because RESEARCH_MODE is not set to real."
             else:
                 run = run_service.create_campaign_run(db, campaign.id)
                 campaign_service.update_campaign_status(db, campaign.id, "running")
                 run_service.execute_campaign_run(run.id, campaign.id)
-                run_note = "Fake workflow completed."
+                run_note = "Workflow completed."
 
         print("Demo campaign created.\n")
         print("Frontend:")

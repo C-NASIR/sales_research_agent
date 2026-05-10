@@ -20,16 +20,20 @@ The API starts on `http://localhost:8000` by default.
 
 ## Research mode
 
-Phase 4 supports two backend research modes:
+The backend now runs a real-only, source-backed workflow.
 
-- `RESEARCH_MODE=fake` keeps the deterministic Phase 3 behavior and does not require API keys.
-- `RESEARCH_MODE=real` runs public web search and scraping and requires both `TAVILY_API_KEY` and `FIRECRAWL_API_KEY`.
+- `RESEARCH_MODE=real` is the only supported runtime mode.
+- Live runs require `TAVILY_API_KEY` and `FIRECRAWL_API_KEY`.
+- `MODEL_NAME` selects the structured generation model used for ICP and outreach drafting.
 
-Other useful Phase 4 environment variables:
+Other useful environment variables:
 
 - `MAX_SEARCH_RESULTS`
 - `MAX_SCRAPED_PAGES_PER_ACCOUNT`
 - `MAX_SOURCE_CHARS`
+- `WORKFLOW_PROVIDER_MODE`
+
+For automated tests, use `WORKFLOW_PROVIDER_MODE=stub` to exercise the real workflow with offline provider stubs.
 
 During MVP development, delete `data/prospecting_agent.db` and restart the API if your local SQLite file was created before the latest schema changes. Phase 9 adds review and export routes on top of the existing schema.
 
@@ -116,12 +120,12 @@ curl http://localhost:8000/campaigns/campaign_REPLACE_ME/runs/latest
 curl http://localhost:8000/campaigns/campaign_REPLACE_ME/todos
 ```
 
-## Phase 5 validation flow
+## Validation flow
 
-Start in fake mode with a fresh SQLite file if you want to validate the deterministic workflow:
+Start in real mode with a fresh SQLite file if you want to validate the workflow end to end:
 
 ```bash
-RESEARCH_MODE=fake DATABASE_URL=sqlite:///./data/phase5_validation.db uvicorn app.main:app --reload
+RESEARCH_MODE=real DATABASE_URL=sqlite:///./data/real_validation.db uvicorn app.main:app --reload
 ```
 
 Then run:
@@ -215,10 +219,10 @@ curl -L http://localhost:8000/campaigns/campaign_REPLACE_ME/exports/export_REPLA
 python3 scripts/seed_demo.py
 ```
 
-For a fully populated fake-mode demo:
+To seed and run the workflow in one step:
 
 ```bash
-RESEARCH_MODE=fake python3 scripts/seed_demo.py --run-fake-workflow
+RESEARCH_MODE=real python3 scripts/seed_demo.py --run-workflow
 ```
 
 ## Run tests

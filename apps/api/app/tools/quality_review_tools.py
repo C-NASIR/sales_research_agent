@@ -70,7 +70,7 @@ def detect_deceptive_subject(outreach_draft: dict) -> list[str]:
     return issues
 
 
-def review_outreach_quality(
+def review_outreach_draft(
     outreach_draft: dict,
     research_report: dict,
     signal_report: dict,
@@ -137,3 +137,6 @@ def review_outreach_quality(
 
 def _combined_text(*parts: str | None) -> str:
     return " ".join((part or "").lower() for part in parts if part)
+
+
+review_outreach_quality = review_outreach_draft
